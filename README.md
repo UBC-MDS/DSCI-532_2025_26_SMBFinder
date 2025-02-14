@@ -1,3 +1,13 @@
-# Project Title
+# SMBFinder: Your Guide to Smarter Business Location Choices
 
-This is a Python-based data visualization project (you can replace this with your actual project description). The project aims to provide interactive data analysis and visualization capabilities through a dashboard interface. This repository contains the source code, documentation, and data required to run the application. 
+## Summary
+
+`SMBFinder` is a data-driven dashboard designed to help entrepreneurs and small business owners identify optimal locations to start their business across the United States. Users can visualize microbusiness density through a heatmap, filter data by state and county, and analyze historical trends in microbusiness growth and workforce availability. The dashboard provides insights into competition levels, median income trends, and other key business indicators. Users can leverage these insights to make informed decisions, reduce risks, and strategically expand their business in the most promising locations.
+
+## Contributing
+
+Interested in contributing? Check out the contributing guidelines. Please note that this project is released with a Code of Conduct. By contributing to this project, you agree to abide by its terms.
+
+## License
+
+`SMBFinder` was created by Anna Nandar, Dongchun Chen, jiayi Li and Marek Boulerice. It is licensed under the terms of the MIT license.
