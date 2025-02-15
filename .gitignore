@@ -169,3 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+#Teamwork contract
+milestone_submissions/milestone_1/teamwork-contract.md
