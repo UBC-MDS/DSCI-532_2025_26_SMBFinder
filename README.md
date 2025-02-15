@@ -2,7 +2,7 @@
 
 ## Summary
 
-`SMBFinder` is a data-driven dashboard designed to help entrepreneurs and small business owners identify optimal locations to start their business across the United States. Users can visualize microbusiness density through a heatmap, filter data by state and county, and analyze historical trends in microbusiness growth and workforce availability. The dashboard provides insights into competition levels, median income trends, and other key business indicators. Users can leverage these insights to make informed decisions, reduce risks, and strategically expand their business in the most promising locations.
+`SMBFinder` (Smart Microbusiness Finder) is a data-driven dashboard designed to help entrepreneurs and microbusiness owners identify optimal locations to start their business across the United States. Users can visualize microbusiness density through a heatmap, filter data by state and county, and analyze historical trends in microbusiness growth and workforce availability. The dashboard provides insights into competition levels, median income trends, and other key business indicators. Users can leverage these insights to make informed decisions, reduce risks, and strategically expand their business in the most promising locations.
 
 ## Contributing
 
