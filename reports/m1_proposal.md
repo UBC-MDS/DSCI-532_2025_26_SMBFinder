@@ -1,4 +1,4 @@
-# Smart Microbusiness Finder Proposal
+# SMBFinder: Smart Microbusiness Finder Proposal
 
 ## Section 1: Motivation and Purpose
 
@@ -45,7 +45,7 @@ This dataset is originally designed for model development, which is split into t
 
 One limitation of the current dataset is the lack of industry-specific information about the microbusinesses. Having data about the types of microbusinesses (e.g., retail, services, technology) would provide valuable insights for more targeted recommendations for the user. 
 
-## Research questions and usage scenarios
+## Section 3: Research questions and usage scenarios
 
 Mina is an entrepreneur exploring potential locations for her new microbusiness in the U.S. She wants to use data to evaluate different regions and make a well-informed decision about where to establish her venture.
 
@@ -69,7 +69,7 @@ Users can scroll down to explore more data distribution graphs, either filtered 
 
 
 ## Definitions:
-**Microbusiness**: A business that has an online presence with less than 10 employees. 
+- **Microbusiness**: A business that has an online presence with less than 10 employees. 
 
 ## Data sources:
 - [Kaggle datalink: GoDaddy - Microbusiness Density Forecasting](https://www.kaggle.com/competitions/godaddy-microbusiness-density-forecasting/overview)
