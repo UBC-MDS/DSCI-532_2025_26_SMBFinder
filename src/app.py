@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 
 #initialize app
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 #initialize app variables
 title = [html.H1('SMBFinder - Explore Microbusinesses around the United States'), html.Br()]
@@ -86,8 +87,5 @@ app.layout = dbc.Container([
 
 
 
-# Get underlying Flask server
-server = app.server
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
