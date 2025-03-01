@@ -223,8 +223,7 @@ def update_map(selected_state, selected_county, selected_column):
         else:
             filtered_df = filtered_df[filtered_df["county"] == selected_county]
     
-
-    print(filtered_df['cfips'].unique())
+    filtered_df['cfips_fixed'] = filtered_df['cfips_fixed'].apply(fix_cfips)
 
     # Default on microbusiness density for now 
     column_to_display = selected_column if selected_column else 'microbusiness_density'
@@ -459,6 +458,6 @@ def update_BI_cards(county):
     ]
     return sellability_list, growth_list, hireability_list
 
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug = True)
+    app.server.run(port= 8001, host='127.0.0.1')
