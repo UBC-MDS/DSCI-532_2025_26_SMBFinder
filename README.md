@@ -4,10 +4,8 @@
 
 `SMBFinder` (Smart Microbusiness Finder) is a data-driven dashboard designed to help entrepreneurs and microbusiness owners identify optimal locations to start their business across the United States. Users can visualize microbusiness density through a heatmap, filter data by state and county, and analyze historical trends in microbusiness growth. The dashboard provides insights into competition levels, median income trends, and other key business indicators - Sellability index, Growth index and Hireability index. Users can leverage these insights to make informed decisions, reduce risks, and strategically expand their business in the most promising locations.
 
-## Contributing
 This document introduces the project, its purpose, and how you can get involved—whether as a user, contributor, or developer. Jump to one of the sections below to learn more:
 
-Interested in contributing? Check out the contributing guidelines. Please note that this project is released with a Code of Conduct. By contributing to this project, you agree to abide by its terms.
 - [What are we doing? (And why?)](#what-are-we-doing)
 - [Who are we?](#who-are-we)
 - [What do we need?](#what-do-we-need)
