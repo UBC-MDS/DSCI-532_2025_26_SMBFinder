@@ -1,6 +1,7 @@
-from dash import Dash, dcc, callback, Output, Input, html, dash_table
+from dash import Dash, dcc, callback, Output, Input, html, dash_table, dash_table
 import dash_bootstrap_components as dbc
 import dash_vega_components as dvc
+import altair as altimport 
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -10,20 +11,25 @@ try:
         display_landing_page_map_dots,
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
-        display_county_level_map
+        display_county_level_map,
+        fix_cfips
     )
 except ModuleNotFoundError:
     from src.components.map_view import (
         display_landing_page_map_dots,
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
-        display_county_level_map
+        display_county_level_map,
+        fix_cfips
     )
 
 # data wrangling for filter & sidebar
 df = pd.read_csv("data/processed/smb_enriched.csv",dtype={'cfips_fixed': str, 'cfips': str})  
 df['cfips_fixed'] = df['cfips_fixed'].astype(str)
 df['cfips'] = df['cfips'].astype(str)
+df['cfips_fixed'] = df['cfips_fixed'].apply(fix_cfips)
+
+
 # Load geojson files
 with open("data/raw/us-states.json") as f:
     states_geojson = json.load(f)
@@ -56,6 +62,11 @@ numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
 # Filter out any columns you don't want to include
 numeric_columns = ['microbusiness_density']
 
+# Get numeric columns for the dropdown
+numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
+# Filter out any columns you don't want to include
+numeric_columns = ['microbusiness_density']
+
 filter_state = [
     dbc.Label("Select a State"),
     dcc.Dropdown(
@@ -82,20 +93,34 @@ filter_column = [
     ),
 ]
 
+# Add new dropdown for selecting numeric column
+filter_column = [
+    dbc.Label("Select Data to Display"),
+    dcc.Dropdown(
+        id='column-dropdown',
+        options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
+        value='microbusiness_density',  # Default value
+        style={'width': '200px'}
+    ),
+]
+
 global_metrics = html.Div([
     html.H4("USA-wide Metrics", style={'textAlign': 'center', 'fontSize': '21px', 'marginBottom': '25px'}),
     html.Div([
         html.H6("Total Microbusinesses", style={'marginBottom': '5px', 'fontSize': '16px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"{total_microbusinesses:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
         html.H6("Avg. Microbusiness Density", style={'marginBottom': '5px', 'fontSize': '16px'}),
         html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"{weighted_microbusiness_density:.2f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
         html.H6("Median Household Income", style={'marginBottom': '5px', 'fontSize': '16px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"${median_income:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
@@ -105,7 +130,7 @@ map = dcc.Graph(id='map-placeholder', style={'height': '550px'})
 
 chart_SMB_density = [
     dvc.Vega(id='density-placeholder', spec={'height': '230px'})  
-]      
+]          
 
 chart_med_income = [
     dvc.Vega(id='income-placeholder', style={'height': '230px'})
