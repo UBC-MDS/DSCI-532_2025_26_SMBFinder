@@ -1,6 +1,7 @@
-from dash import Dash, dcc, callback, Output, Input, html, dash_table
+from dash import Dash, dcc, callback, Output, Input, html, dash_table, dash_table
 import dash_bootstrap_components as dbc
 import dash_vega_components as dvc
+import altair as altimport 
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -61,6 +62,11 @@ numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
 # Filter out any columns you don't want to include
 numeric_columns = ['microbusiness_density']
 
+# Get numeric columns for the dropdown
+numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
+# Filter out any columns you don't want to include
+numeric_columns = ['microbusiness_density']
+
 filter_state = [
     dbc.Label("Select a State"),
     dcc.Dropdown(
@@ -87,20 +93,34 @@ filter_column = [
     ),
 ]
 
+# Add new dropdown for selecting numeric column
+filter_column = [
+    dbc.Label("Select Data to Display"),
+    dcc.Dropdown(
+        id='column-dropdown',
+        options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
+        value='microbusiness_density',  # Default value
+        style={'width': '200px'}
+    ),
+]
+
 global_metrics = html.Div([
     html.H4("USA-wide Metrics", style={'textAlign': 'center', 'fontSize': '21px', 'marginBottom': '25px'}),
     html.Div([
         html.H6("Total Microbusinesses", style={'marginBottom': '5px', 'fontSize': '16px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"{total_microbusinesses:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
         html.H6("Avg. Microbusiness Density", style={'marginBottom': '5px', 'fontSize': '16px'}),
         html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"{weighted_microbusiness_density:.2f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
         html.H6("Median Household Income", style={'marginBottom': '5px', 'fontSize': '16px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"${median_income:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
@@ -110,27 +130,25 @@ map = dcc.Graph(id='map-placeholder', style={'height': '550px'})
 
 chart_SMB_density = [
     dvc.Vega(id='density-placeholder', spec={'height': '230px'})  
-]      
+]          
 
 chart_med_income = [
     dvc.Vega(id='income-placeholder', style={'height': '230px'})
 ]
 
-card_sellability = dbc.Card([
-    dbc.CardHeader('Sellability index'), 
-    dbc.CardBody('placeholder sellability value'),
-])  
+card_sellability = dbc.Card(id = "sellability")
 
-card_competition = dbc.Card([
-    dbc.CardHeader('competition index'), 
-    dbc.CardBody('placeholder competition value'),
+card_growth = dbc.Card(id = "growth")
+
+card_hireability = dbc.Card(id = "hireability")
+
+end_credits = html.Div([
+    html.Br(),
+    html.H6("App allowing user to explore MicroBusiness density across the US, and derive key metrics used in deciding where to launch their next venture", style={'marginBottom': '5px', 'fontSize': '16px'}),
+    html.H6("Created by: Anna Nandar, Dongchun Chen, Jiayi Li, Marek Boulerice", style={'marginBottom': '5px', 'fontSize': '10px'}),
+    html.H6("Repo: https://github.com/UBC-MDS/DSCI-532_2025_26_SMBFinder", style={'marginBottom': '5px', 'fontSize': '10px'}),
+    html.H6("Latest Deployment: 2025/03/01", style={'marginBottom': '5px', 'fontSize': '10px'}),
 ])
-
-card_hireability = dbc.Card([
-    dbc.CardHeader('hireability index'), 
-    dbc.CardBody('placeholder hireability value'),
-])
-
 
 #app layout
 app.layout = dbc.Container([
@@ -164,10 +182,11 @@ app.layout = dbc.Container([
         dbc.Row(
             [
                 dbc.Col(card_sellability),
-                dbc.Col(card_competition),
+                dbc.Col(card_growth),
                 dbc.Col(card_hireability),
             ]
         ),
+        dbc.Row(end_credits)
 ])
 
 @app.callback(
@@ -346,6 +365,99 @@ def update_income_chart(selected_state=None, selected_county=None):
 
     return final_chart.to_dict()
 
+@app.callback(
+    [Output("sellability", "children"),
+    Output("growth", "children"),
+    Output("hireability", "children")],
+    [Input("county-dropdown", "value")]
+)
+def update_BI_cards(county):
+    print(county)
+
+    if not county:
+        sellability_empty = [
+            dbc.CardHeader("Sellability index"),
+            dbc.CardBody("[Select a county]"),
+            dbc.CardFooter("County percentile median income", style={'fontSize': '12px'})
+        ]
+        growth_empty = [
+            dbc.CardHeader("Growth index"),
+            dbc.CardBody("[Select a county]"),
+            dbc.CardFooter("county percentile for average yealy Microbusiness growth",style={'fontSize': '12px'})
+        ]
+        hireability_empty = [
+            dbc.CardHeader("Hireability index"),
+            dbc.CardBody("[Select a county]"),
+            dbc.CardFooter("County percentile for percent of population with bachelors degree", style={'fontSize': '12px'})
+        ]
+        return sellability_empty, growth_empty, hireability_empty
+    
+    latest_date = "2022-10-01"
+
+    #calculating sellability index
+    county_income = df[df["county"] == county][f"median_hh_inc_{latest_year}"].iloc[0]
+    sell_df = df[df["first_day_of_month"] == latest_date]
+    sell_df = sell_df[[f"median_hh_inc_{latest_year}"]]
+    clean_sell = sell_df.dropna()
+    sort_sell = np.sort(clean_sell[f"median_hh_inc_{latest_year}"])
+    sell_percentile = round(np.searchsorted(sort_sell,county_income,side = "right")/ len(sort_sell)*100 , 2)
+
+    #calculating Hireability index
+    #note: brown county returns different value on app than in testing. look into
+    county_education = df[df["county"] == county][f"pct_college_{latest_year}"].iloc[0]
+    hire_df = df[df["first_day_of_month"] == latest_date]
+    hire_df = hire_df[[f"pct_college_{latest_year}"]]
+    clean_hire = hire_df.dropna()
+    sort_hire = np.sort(clean_hire[f"pct_college_{latest_year}"])
+    hire_percentile = round(np.searchsorted(sort_hire,county_education,side = "right")/ len(sort_hire)*100 , 2)
+
+
+    # calculating growth index
+    growth_df = df.copy()
+    #create data frame of counties with number of businesses in each year
+    growth_df = growth_df[["county","state", "first_day_of_month","active"]]
+    growth_df["first_day_of_month"] = pd.to_datetime(growth_df["first_day_of_month"])
+    growth_df["year"] = growth_df["first_day_of_month"].dt.year
+    growth_df["month"] = growth_df["first_day_of_month"].dt.month
+    growth_df = growth_df[growth_df["month"] == 10]
+    growth_df = growth_df[["county", "state", "active", "year"]]
+    growth_df = growth_df.pivot(index=["county", "state"], columns = "year", values="active")
+    growth_df = growth_df.reset_index()
+    growth_df.columns = growth_df.columns.astype(str)
+
+    # Calculate percent change between years
+    growth_df['pct_change_2019_2020'] = (growth_df['2020'] - growth_df['2019']) / growth_df['2019'] * 100
+    growth_df['pct_change_2020_2021'] = (growth_df['2021'] - growth_df['2020']) / growth_df['2020'] * 100
+    growth_df['pct_change_2021_2022'] = (growth_df['2022'] - growth_df['2021']) / growth_df['2021'] * 100
+
+    # Calculate the average percent change across these years
+    growth_df['mean_pct_change'] = growth_df[['pct_change_2019_2020', 'pct_change_2020_2021', 'pct_change_2021_2022']].mean(axis=1)
+    growth_df = growth_df[["county", "state", "mean_pct_change"]]
+
+    county_growth = growth_df[growth_df["county"] == county]["mean_pct_change"].iloc[0]
+    clean_growth = growth_df.dropna()
+    sort_growth = np.sort(clean_growth["mean_pct_change"])
+    growth_percentile = round(np.searchsorted(sort_growth, county_growth, side = "right")/ len(sort_growth)*100, 2)
+
+
+
+    sellability_list = [
+        dbc.CardHeader("Sellability index"),
+        dbc.CardBody(f"{sell_percentile}%"),
+        dbc.CardFooter("County percentile median income", style={'fontSize': '12px'})
+    ]
+    growth_list = [
+        dbc.CardHeader("Growth index"),
+        dbc.CardBody(f"{growth_percentile}%"),
+        dbc.CardFooter("county percentile for average yealy Microbusiness growth", style={'fontSize': '12px'})
+    ]
+    hireability_list = [
+        dbc.CardHeader("Hireability index"),
+        dbc.CardBody(f"{hire_percentile}%"),
+        dbc.CardFooter("County percentile for percent of population with bachelors degree", style={'fontSize': '12px'})
+    ]
+    return sellability_list, growth_list, hireability_list
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug = True)
+    app.server.run(port= 8001, host='127.0.0.1')
