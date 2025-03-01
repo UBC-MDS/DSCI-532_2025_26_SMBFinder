@@ -77,20 +77,11 @@ chart_med_income = [
     dcc.Graph(id='income-placeholder', style={'height': '230px'})
 ]
 
-card_sellability = dbc.Card([
-    dbc.CardHeader('Sellability index'), 
-    dbc.CardBody('placeholder sellability value'),
-])  
+card_sellability = dbc.Card(id = "sellability")
 
-card_competition = dbc.Card([
-    dbc.CardHeader('competition index'), 
-    dbc.CardBody('placeholder competition value'),
-])
+card_competition = dbc.Card(id = "competition")
 
-card_hireability = dbc.Card([
-    dbc.CardHeader('hireability index'), 
-    dbc.CardBody('placeholder hireability value'),
-])
+card_hireability = dbc.Card(id = "hireability")
 
 
 #app layout
@@ -131,6 +122,32 @@ def update_county_dropdown(selected_state):
         return []
     return [{"label": county, "value": county} for county in state_county_mapping[selected_state]]  
 
+@app.callback(
+    [Output("sellability", "children"),
+    Output("competition", "children"),
+    Output("hireability", "children")],
+    [Input("county-dropdown", "value")]
+)
+def update_BI_cards(county):
+    print(county)
+
+    sellability_empty = [
+        dbc.CardHeader("Sellability index"),
+        dbc.CardBody(""),
+        dbc.CardFooter("")
+    ]
+    competition_empty = [
+        dbc.CardHeader("Competition index"),
+        dbc.CardBody(""),
+        dbc.CardFooter("")
+    ]
+    hireability_empty = [
+        dbc.CardHeader("Hireability index"),
+        dbc.CardBody(""),
+        dbc.CardFooter("")
+    ]
+    return sellability_empty,competition_empty,hireability_empty
+
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
