@@ -131,22 +131,40 @@ def update_county_dropdown(selected_state):
 def update_BI_cards(county):
     print(county)
 
-    sellability_empty = [
+    if not county:
+        sellability_empty = [
+            dbc.CardHeader("Sellability index"),
+            dbc.CardBody(""),
+            dbc.CardFooter("")
+        ]
+        competition_empty = [
+            dbc.CardHeader("Competition index"),
+            dbc.CardBody(""),
+            dbc.CardFooter("")
+        ]
+        hireability_empty = [
+            dbc.CardHeader("Hireability index"),
+            dbc.CardBody(""),
+            dbc.CardFooter("")
+        ]
+        return sellability_empty,competition_empty,hireability_empty
+    
+    sellability_list = [
         dbc.CardHeader("Sellability index"),
-        dbc.CardBody(""),
-        dbc.CardFooter("")
+        dbc.CardBody(county),
+        dbc.CardFooter(county)
     ]
-    competition_empty = [
-        dbc.CardHeader("Competition index"),
-        dbc.CardBody(""),
-        dbc.CardFooter("")
+    competition_list = [
+        dbc.CardHeader("Growth index"),
+        dbc.CardBody(county),
+        dbc.CardFooter(county)
     ]
-    hireability_empty = [
+    hireability_list = [
         dbc.CardHeader("Hireability index"),
-        dbc.CardBody(""),
-        dbc.CardFooter("")
+        dbc.CardBody(county),
+        dbc.CardFooter(county)
     ]
-    return sellability_empty,competition_empty,hireability_empty
+    return sellability_list, competition_list, hireability_list
 
 
 if __name__ == '__main__':
