@@ -4,13 +4,20 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 import json
-from components.map_view import (
-    display_landing_page_map_dots,
-    display_landing_page_map_choropleth_counties,
-    display_state_level_map,
-    display_county_level_map
-)
-
+try:
+    from components.map_view import (
+        display_landing_page_map_dots,
+        display_landing_page_map_choropleth_counties,
+        display_state_level_map,
+        display_county_level_map
+    )
+except ModuleNotFoundError:
+    from src.components.map_view import (
+        display_landing_page_map_dots,
+        display_landing_page_map_choropleth_counties,
+        display_state_level_map,
+        display_county_level_map
+    )
 
 # data wrangling for filter & sidebar
 df = pd.read_csv("data/processed/smb_enriched.csv",dtype={'cfips_fixed': str, 'cfips': str})  
