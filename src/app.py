@@ -1,11 +1,27 @@
-from dash import Dash, dcc, callback, Output, Input, html
+from dash import Dash, dcc, callback, Output, Input, html, dash_table
 import dash_bootstrap_components as dbc
 
 import pandas as pd
 import numpy as np
+import json
+from components.map_view import (
+    display_landing_page_map_dots,
+    display_landing_page_map_choropleth_counties,
+    display_state_level_map,
+    display_county_level_map
+)
+
 
 # data wrangling for filter & sidebar
-df = pd.read_csv("data/processed/smb_enriched.csv")  
+df = pd.read_csv("data/processed/smb_enriched_2.csv",dtype={'cfips_fixed': str, 'cfips': str})  
+df['cfips_fixed'] = df['cfips_fixed'].astype(str)
+df['cfips'] = df['cfips'].astype(str)
+# Load geojson files
+with open("data/raw/us-states.json") as f:
+    states_geojson = json.load(f)
+
+with open("data/raw/geojson-counties-fips.json") as f:
+    counties_geojson = json.load(f)
 
 unique_states = sorted(df["state"].unique())
 state_county_mapping = df.groupby("state")["county"].unique().apply(list).to_dict()
@@ -27,6 +43,11 @@ server = app.server
 #initialize app variables
 title = [html.H1('SMBFinder - Explore Microbusinesses around the United States'), html.Br()]
 
+# Get numeric columns for the dropdown
+numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
+# Filter out any columns you don't want to include
+numeric_columns = ['microbusiness_density']
+
 filter_state = [
     dbc.Label("Select a State"),
     dcc.Dropdown(
@@ -40,6 +61,17 @@ filter_state = [
 filter_county = [
     dbc.Label("Select a County"),
     dcc.Dropdown(id='county-dropdown', placeholder='Select a County', style={'width': '200px'}),
+]
+
+# Add new dropdown for selecting numeric column
+filter_column = [
+    dbc.Label("Select Data to Display"),
+    dcc.Dropdown(
+        id='column-dropdown',
+        options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
+        value='microbusiness_density',  # Default value
+        style={'width': '200px'}
+    ),
 ]
 
 global_metrics = html.Div([
@@ -102,9 +134,18 @@ app.layout = dbc.Container([
                     dbc.Row([
                             dbc.Col(filter_state),
                             dbc.Col(filter_county),
+                            dbc.Col(filter_column),  # Add the new dropdown here
                     ]),
                     dbc.Row(map)
                 ], md=9),
+        ]),
+
+        # Add this new row for the data table
+        dbc.Row([
+            dbc.Col([
+                html.H4("Filtered Data"),
+                html.Div(id='filtered-data-table')
+            ])
         ]),
 
         dbc.Row(
@@ -131,6 +172,53 @@ def update_county_dropdown(selected_state):
         return []
     return [{"label": county, "value": county} for county in state_county_mapping[selected_state]]  
 
+@app.callback(
+    Output("map-placeholder", "figure"),
+    [Input("state-dropdown", "value"),
+     Input("county-dropdown", "value"),
+     Input("column-dropdown", "value")]  
+)
+def update_map(selected_state, selected_county, selected_column):
+    # Start with all data
+    
+    filtered_df = df.copy()
+    filtered_df = filtered_df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
+    
+    # Filter based on selections
+    if selected_state:
+        if isinstance(selected_state, list):
+            filtered_df = filtered_df[filtered_df["state"].isin(selected_state)]
+        else:
+            filtered_df = filtered_df[filtered_df["state"] == selected_state]
+        
+    if selected_county:
+        if isinstance(selected_county, list):
+            filtered_df = filtered_df[filtered_df["county"].isin(selected_county)]
+        else:
+            filtered_df = filtered_df[filtered_df["county"] == selected_county]
+    
+
+    print(filtered_df['cfips'].unique())
+
+    # Default on microbusiness density for now 
+    column_to_display = selected_column if selected_column else 'microbusiness_density'
+    
+    # If county is selected, show county level map
+    if selected_county:
+        fig = display_county_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
+    # If state is selected but no county
+    elif selected_state:
+        fig = display_state_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
+    # Default view for entire US
+    else:
+        fig = display_landing_page_map_choropleth_counties(filtered_df, counties_geojson, 0.7, 'cfips_fixed', column_to_display)
+    
+    # Remove the legend
+    fig.update_layout(showlegend=False, coloraxis_showscale=False)
+    
+    return fig
+
+
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
