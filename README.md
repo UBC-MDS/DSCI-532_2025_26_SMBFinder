@@ -10,7 +10,6 @@ This document introduces the project, its purpose, and how you can get involvedâ
 - [Who are we?](#who-are-we)
 - [What do we need?](#what-do-we-need)
 - [How can you get involved?](#get-involved)
-- [Get in touch](#get-in-touch)
 - [Find out more](#find-out-more)
 
 ---
