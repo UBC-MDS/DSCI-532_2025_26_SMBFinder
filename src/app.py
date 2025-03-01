@@ -79,7 +79,7 @@ chart_med_income = [
 
 card_sellability = dbc.Card(id = "sellability")
 
-card_competition = dbc.Card(id = "competition")
+card_growth = dbc.Card(id = "growth")
 
 card_hireability = dbc.Card(id = "hireability")
 
@@ -107,7 +107,7 @@ app.layout = dbc.Container([
         dbc.Row(
             [
                 dbc.Col(card_sellability),
-                dbc.Col(card_competition),
+                dbc.Col(card_growth),
                 dbc.Col(card_hireability),
             ]
         ),
@@ -124,7 +124,7 @@ def update_county_dropdown(selected_state):
 
 @app.callback(
     [Output("sellability", "children"),
-    Output("competition", "children"),
+    Output("growth", "children"),
     Output("hireability", "children")],
     [Input("county-dropdown", "value")]
 )
@@ -137,8 +137,8 @@ def update_BI_cards(county):
             dbc.CardBody(""),
             dbc.CardFooter("")
         ]
-        competition_empty = [
-            dbc.CardHeader("Competition index"),
+        growth_empty = [
+            dbc.CardHeader("Growth index"),
             dbc.CardBody(""),
             dbc.CardFooter("")
         ]
@@ -147,7 +147,7 @@ def update_BI_cards(county):
             dbc.CardBody(""),
             dbc.CardFooter("")
         ]
-        return sellability_empty,competition_empty,hireability_empty
+        return sellability_empty, growth_empty, hireability_empty
     
     latest_date = "2022-10-01"
 
@@ -203,7 +203,7 @@ def update_BI_cards(county):
         dbc.CardBody(f"{sell_percentile}%"),
         dbc.CardFooter(county)
     ]
-    competition_list = [
+    growth_list = [
         dbc.CardHeader("Growth index"),
         dbc.CardBody(f"{growth_percentile}%"),
         dbc.CardFooter(county)
@@ -213,7 +213,7 @@ def update_BI_cards(county):
         dbc.CardBody(f"{hire_percentile}%"),
         dbc.CardFooter(county)
     ]
-    return sellability_list, competition_list, hireability_list
+    return sellability_list, growth_list, hireability_list
 
 
 if __name__ == '__main__':
