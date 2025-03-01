@@ -1,3 +1,6 @@
+import plotly.express as px
+import pandas as pd
+
 def display_landing_page_map_dots(enriched_df):
 
 
@@ -34,21 +37,21 @@ def display_landing_page_map_dots(enriched_df):
     """
 
     fig = px.scatter_geo(
-        df_latest,
+        enriched_df,
         lat='centroid_lat',
         lon='centroid_lng',
         scope='usa',
         color='microbusiness_density',
         size='active',
-        # hover_name='county',
-        # hover_data={
-        #     'state': True,
-        #     'microbusiness_density': ':.2f',
-        #     'active': True,
-        #     'median_hh_inc_2021': True,
-        #     'centroid_lat': False,
-        #     'centroid_lng': False
-        # },
+        hover_name='county',
+        hover_data={
+            'state': True,
+            'microbusiness_density': ':.2f',
+            'active': True,
+            'median_hh_inc_2021': True,
+            'centroid_lat': False,
+            'centroid_lng': False
+        },
         color_continuous_scale='Viridis',
         title='US Counties Microbusiness Density'
     )
@@ -57,13 +60,13 @@ def display_landing_page_map_dots(enriched_df):
         mapbox_style="carto-positron",
         margin={"r":0,"t":50,"l":0,"b":0},
         uirevision='constant',
-        hovermode=False,
+        hovermode='closest',
     )
 
 
     return fig
 
-def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile):
+def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile, location_col, color_col):
 
     percentile_filtered = enriched_df['microbusiness_density'].quantile(percentile)
 
@@ -71,14 +74,14 @@ def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, perc
 
 
     # Display the filtered data
-    high_density_counties
+    # high_density_counties
 
     center_lat = enriched_df['centroid_lat'].mean()
     center_lon = enriched_df['centroid_lng'].mean()
 
     
 
-    fig = px.choropleth_map(high_density_counties, geojson=geojson_file, locations='cfips', color='microbusiness_density',
+    fig = px.choropleth_map(high_density_counties, geojson=geojson_file, locations=location_col, color=color_col,
                            color_continuous_scale="Viridis",
                            range_color=(0, 12),
                            map_style="carto-positron",
@@ -91,20 +94,20 @@ def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, perc
 
     return fig 
 
-def display_landing_page_map_choropleth_states(enriched_df, geojson_file, percentile):
+def display_landing_page_map_choropleth_states(enriched_df, geojson_file, percentile, location_col, color_col):
 
-    percentile_filtered = enriched_df['microbusiness_density'].quantile(percentile)
+    percentile_filtered = enriched_df[color_col].quantile(percentile)
 
-    high_density_counties = enriched_df[enriched_df['microbusiness_density'] > percentile_filtered]
+    high_density_counties = enriched_df[enriched_df[color_col] > percentile_filtered]
 
     # Display the filtered data
-    high_density_counties
+    # high_density_counties
 
     center_lat = enriched_df['centroid_lat'].mean()
     center_lon = enriched_df['centroid_lng'].mean()
 
-    fig = px.choropleth_map(high_density_counties, geojson=geojson_file, locations='state_id', 
-    color='microbusiness_density',
+    fig = px.choropleth_map(high_density_counties, geojson=geojson_file, locations=location_col, 
+    color=color_col,
                            color_continuous_scale="Viridis",
                            range_color=(0, 12),
                            map_style="carto-positron",
@@ -117,13 +120,13 @@ def display_landing_page_map_choropleth_states(enriched_df, geojson_file, percen
 
     return fig 
 
-def display_state_level_map(enriched_df, geojson_file):
+def display_state_level_map(enriched_df, geojson_file, location_col, color_col):
 
     center_lat = enriched_df['centroid_lat'].mean()
     center_lon = enriched_df['centroid_lng'].mean()
 
     # Filter the data for the specific state
-    fig = px.choropleth_map(enriched_df, geojson=geojson_file, locations='cfips', color='microbusiness_density',
+    fig = px.choropleth_map(enriched_df, geojson=geojson_file, locations=location_col, color=color_col,
                            color_continuous_scale="Viridis",
                            range_color=(0, 12),
                            map_style="carto-positron",
@@ -137,5 +140,26 @@ def display_state_level_map(enriched_df, geojson_file):
     return fig
 
 
-def display_county_level_map(enriched_df, geojson_file):
-    return
+def display_county_level_map(enriched_df, geojson_file, location_col, color_col):
+    
+    center_lat = enriched_df['centroid_lat'].mean()
+    center_lon = enriched_df['centroid_lng'].mean()
+
+    # Create a choropleth map focused on the county
+    fig = px.choropleth_map(enriched_df, geojson=geojson_file, locations='cfips', color='microbusiness_density',
+                           color_continuous_scale="Viridis",
+                           range_color=(0, 12),
+                           map_style="carto-positron",
+                           zoom=8, center = {"lat": center_lat, "lon": center_lon},
+                           opacity=0.8,
+                           labels={'microbusiness_density':'Microbusiness Density'}
+                          )
+    
+    fig.update_layout(
+        margin={"r":0,"t":0,"l":0,"b":0},
+        coloraxis_colorbar=dict(
+            title="Microbusiness Density"
+        )
+    )
+    
+    return fig
