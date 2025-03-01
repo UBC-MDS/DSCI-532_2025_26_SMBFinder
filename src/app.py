@@ -1,6 +1,7 @@
 from dash import Dash, dcc, callback, Output, Input, html, dash_table
 import dash_bootstrap_components as dbc
-
+import dash_vega_components as dvc
+import altair as alt
 import pandas as pd
 import numpy as np
 import json
@@ -103,13 +104,11 @@ global_metrics = html.Div([
 map = dcc.Graph(id='map-placeholder', style={'height': '550px'})
 
 chart_SMB_density = [
-    dbc.Label("Small Business density vs time in this overall/State/County", style={'textAlign': 'center', 'fontSize': '20px'}),
-    dcc.Graph(id='density-placeholder', style={'height': '230px'})
-]       
+    dvc.Vega(id='density-placeholder', spec={'height': '230px'})  
+]      
 
 chart_med_income = [
-    dbc.Label("Median income vs time in this overall/State/County", style={'textAlign': 'center', 'fontSize': '20px'}),
-    dcc.Graph(id='income-placeholder', style={'height': '230px'})
+    dvc.Vega(id='income-placeholder', style={'height': '230px'})
 ]
 
 card_sellability = dbc.Card([
@@ -221,6 +220,127 @@ def update_map(selected_state, selected_county, selected_column):
     
     return fig
 
+@app.callback(
+    Output("density-placeholder", "spec"),
+    [Input("state-dropdown", "value"),
+     Input("county-dropdown", "value")]
+)
+
+def update_chart(selected_state=None, selected_county=None):
+    
+    df_smb = df.copy()
+    df_smb["year"] = pd.to_datetime(df_smb["first_day_of_month"]).dt.year  
+
+    chart_title = "Average Business Density Growth Over Time Across USA"
+
+    if not selected_state and not selected_county:
+        filtered_df = df_smb.groupby("year", as_index=False)["microbusiness_density"].mean().round(2)
+
+    else:
+
+        filtered_df = df_smb.copy()
+
+        if selected_state:
+            filtered_df = filtered_df[filtered_df["state"] == selected_state]
+            chart_title = f"Average Business Density Growth Over Time in {selected_state}" 
+
+        
+        if selected_county:
+            filtered_df = filtered_df[filtered_df["county"] == selected_county]
+            chart_title = f"Average Business Density Growth Over Time in {selected_county}, {selected_state}" 
+
+
+        filtered_df = filtered_df.groupby("year", as_index=False)["microbusiness_density"].mean().round(2)
+
+
+    if filtered_df.empty:
+        return {}
+
+    line_chart = alt.Chart(filtered_df).mark_line().encode(
+        x=alt.X('year:O', title="Year", axis = alt.Axis(labelAngle = 0)),
+        y=alt.Y('microbusiness_density:Q', title="Microbusiness Density"),
+        tooltip=['year:O', 'microbusiness_density:Q']
+    )
+
+    scatter_points = alt.Chart(filtered_df).mark_point(
+        size=120,  
+        filled=True,
+        color="green"  
+    ).encode(
+        x=alt.X('year:O', title="Year"),
+        y=alt.Y('microbusiness_density:Q', title="Microbusiness Density"),
+        tooltip=['year:O', 'microbusiness_density:Q']
+    )
+
+    final_chart = (line_chart + scatter_points).properties(
+        width=500, height=300,
+        title= chart_title
+    ).configure_title(fontSize=15).interactive()
+
+    return final_chart.to_dict()
+
+@app.callback(
+    Output("income-placeholder", "spec"),
+    [Input("state-dropdown", "value"),
+     Input("county-dropdown", "value")]
+)
+def update_income_chart(selected_state=None, selected_county=None):
+    
+    df_income = df.copy()
+
+    income_columns = [col for col in df_income.columns if col.startswith("median_hh_inc_")]
+    df_income = df_income.melt(id_vars=["state", "county"], 
+                                value_vars=income_columns, 
+                                var_name="year", 
+                                value_name="median_income")
+
+    df_income["year"] = df_income["year"].str.extract("(\d{4})").astype(int)
+
+    chart_title = "Median Household Income Growth Over Time Across USA"
+
+    if not selected_state and not selected_county:
+        filtered_df = df_income.groupby("year", as_index=False)["median_income"].mean().round(2)
+
+    else:
+        filtered_df = df_income.copy()
+
+        if selected_state:
+            filtered_df = filtered_df[filtered_df["state"] == selected_state]
+            chart_title = f"Median Household Income Growth Over Time in {selected_state}"
+
+        if selected_county:
+            filtered_df = filtered_df[filtered_df["county"] == selected_county]
+            chart_title = f"Median Household Income Growth Over Time in {selected_county}, {selected_state}"
+
+        filtered_df = filtered_df.groupby("year", as_index=False)["median_income"].mean().round(2)
+
+    if filtered_df.empty:
+        return {}
+
+    line_chart = alt.Chart(filtered_df).mark_line().encode(
+        x=alt.X('year:O', title="Year", axis=alt.Axis(labelAngle=0)),
+        y=alt.Y('median_income:Q', title="Median Household Income"),
+        tooltip=['year:O', 'median_income:Q']
+    )
+
+    scatter_points = alt.Chart(filtered_df).mark_point(
+        size=120,  
+        filled=True,
+        color="blue" 
+    ).encode(
+        x=alt.X('year:O', title="Year"),
+        y=alt.Y('median_income:Q', title="Median Household Income"),
+        tooltip=['year:O', 'median_income:Q']
+    )
+
+    final_chart = (line_chart + scatter_points).properties(
+        width=500, height=300,
+        title=chart_title  
+    ).configure_title(
+        fontSize=15 
+    ).interactive()
+
+    return final_chart.to_dict()
 
 
 if __name__ == '__main__':
