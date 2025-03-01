@@ -10,20 +10,25 @@ try:
         display_landing_page_map_dots,
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
-        display_county_level_map
+        display_county_level_map,
+        fix_cfips
     )
 except ModuleNotFoundError:
     from src.components.map_view import (
         display_landing_page_map_dots,
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
-        display_county_level_map
+        display_county_level_map,
+        fix_cfips
     )
 
 # data wrangling for filter & sidebar
 df = pd.read_csv("data/processed/smb_enriched.csv",dtype={'cfips_fixed': str, 'cfips': str})  
 df['cfips_fixed'] = df['cfips_fixed'].astype(str)
 df['cfips'] = df['cfips'].astype(str)
+df['cfips_fixed'] = df['cfips_fixed'].apply(fix_cfips)
+
+
 # Load geojson files
 with open("data/raw/us-states.json") as f:
     states_geojson = json.load(f)
@@ -198,8 +203,7 @@ def update_map(selected_state, selected_county, selected_column):
         else:
             filtered_df = filtered_df[filtered_df["county"] == selected_county]
     
-
-    print(filtered_df['cfips'].unique())
+    filtered_df['cfips_fixed'] = filtered_df['cfips_fixed'].apply(fix_cfips)
 
     # Default on microbusiness density for now 
     column_to_display = selected_column if selected_column else 'microbusiness_density'
@@ -434,6 +438,6 @@ def update_BI_cards(county):
     ]
     return sellability_list, growth_list, hireability_list
 
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug = True)
+    app.server.run(port= 8001, host='127.0.0.1')
