@@ -10,7 +10,6 @@ This document introduces the project, its purpose, and how you can get involvedâ
 - [Who are we?](#who-are-we)
 - [What do we need?](#what-do-we-need)
 - [How can you get involved?](#get-involved)
-- [Get in touch](#get-in-touch)
 - [Find out more](#find-out-more)
 
 ---
@@ -60,7 +59,7 @@ Entrepreneurs, Small Business Owners, Investors, and Economic Policymakers.
 
 ### Live Demo:
 
-[SMBFinder Dashboard](https://dsci-532-2025-24-smbfinder.onrender.com/)
+[SMBFinder Dashboard](https://dsci-532-2025-26-smbfinder.onrender.com/)
 
 ### Demo GIF:
 
@@ -75,7 +74,7 @@ Read our **Contributing Guide** to get started!
 #### Step 1: Clone the repository
 
 ```sh
-git clone https://github.com/UBC-MDS/DSCI-532_2025_24_smbfinder.git
+git clone https://github.com/UBC-MDS/DSCI-532_2025_26_smbfinder.git
 cd your-repo-folder
 ```
 
@@ -93,7 +92,7 @@ python src/app.py
 
 #### Step 4: Start contributing!
 
-- Report issues or suggest enhancements in GitHub Issues: [SMBFinder Issues](https://github.com/UBC-MDS/DSCI-532_2025_24_smbfinder/issues)
+- Report issues or suggest enhancements in GitHub Issues: [SMBFinder Issues](https://github.com/UBC-MDS/DSCI-532_2025_26_smbfinder/issues)
 - Share feedback on documentation and dataset usage.
 
 ---
