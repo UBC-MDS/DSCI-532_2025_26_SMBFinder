@@ -29,8 +29,8 @@ A new dropdown allows users to select different metrics to display on the heatma
   
 **Limitations**
 - No Side-by-Side Comparisons: Users cannot currently select multiple states/counties for comparison.
-- No Explanations for Business Indices: Users may struggle to interpret hireability, competition, and sellability scores.
+- Limited Explanations for Business Indices: While each index has a brief description, users may still need more context or guidance to fully understand their significance and how they should inform decision-making.
   
 **Potential improvements**
 - Allow multiple state/county selections for direct comparisons.
-- Add explanations or tooltips to improve user understanding of business indices.
+- Enhance explanations or add interactive tooltips for business indices to provide users with clearer insights on their meaning, relevance, and impact on decision-making.
