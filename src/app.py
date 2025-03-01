@@ -149,9 +149,20 @@ def update_BI_cards(county):
         ]
         return sellability_empty,competition_empty,hireability_empty
     
+    latest_date = "2022-10-01"
+
+    #calculating sellability index
+    county_income = df[df["county"] == county][f"median_hh_inc_{latest_year}"].iloc[0]
+    sell_df = df[df["first_day_of_month"] == latest_date]
+    sell_df = sell_df[[f"median_hh_inc_{latest_year}"]]
+    clean_sell = sell_df.dropna()
+    sort_sell = np.sort(clean_sell[f"median_hh_inc_{latest_year}"])
+    sell_percentile = round(np.searchsorted(sort_sell,county_income,side = "right")/ len(sort_sell)*100 , 2)
+
+
     sellability_list = [
         dbc.CardHeader("Sellability index"),
-        dbc.CardBody(county),
+        dbc.CardBody(f"{sell_percentile}%"),
         dbc.CardFooter(county)
     ]
     competition_list = [
