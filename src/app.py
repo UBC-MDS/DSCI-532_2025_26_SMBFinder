@@ -83,6 +83,13 @@ card_growth = dbc.Card(id = "growth")
 
 card_hireability = dbc.Card(id = "hireability")
 
+end_credits = html.Div([
+    html.Br(),
+    html.H6("App allowing user to explore MicroBusiness density across the US, and derive key metrics used in deciding where to launch their next venture", style={'marginBottom': '5px', 'fontSize': '16px'}),
+    html.H6("Created by: Anna Nandar, Dongchun Chen, Jiayi Li, Marek Boulerice", style={'marginBottom': '5px', 'fontSize': '10px'}),
+    html.H6("Repo: https://github.com/UBC-MDS/DSCI-532_2025_26_SMBFinder", style={'marginBottom': '5px', 'fontSize': '10px'}),
+    html.H6("Latest Deployment: 2025/03/01", style={'marginBottom': '5px', 'fontSize': '10px'}),
+])
 
 #app layout
 app.layout = dbc.Container([
@@ -111,6 +118,7 @@ app.layout = dbc.Container([
                 dbc.Col(card_hireability),
             ]
         ),
+        dbc.Row(end_credits)
 ])
 
 @app.callback(
@@ -135,17 +143,17 @@ def update_BI_cards(county):
         sellability_empty = [
             dbc.CardHeader("Sellability index"),
             dbc.CardBody(""),
-            dbc.CardFooter("")
+            dbc.CardFooter("County percentile for median income relative to all other counties")
         ]
         growth_empty = [
             dbc.CardHeader("Growth index"),
             dbc.CardBody(""),
-            dbc.CardFooter("")
+            dbc.CardFooter("3-year average increase of microbusinesses in county relative to other US counties")
         ]
         hireability_empty = [
             dbc.CardHeader("Hireability index"),
             dbc.CardBody(""),
-            dbc.CardFooter("")
+            dbc.CardFooter("County percentile for percentage of population with higher education")
         ]
         return sellability_empty, growth_empty, hireability_empty
     
@@ -201,17 +209,17 @@ def update_BI_cards(county):
     sellability_list = [
         dbc.CardHeader("Sellability index"),
         dbc.CardBody(f"{sell_percentile}%"),
-        dbc.CardFooter(county)
+        dbc.CardFooter("County percentile for median income relative to all other counties")
     ]
     growth_list = [
         dbc.CardHeader("Growth index"),
         dbc.CardBody(f"{growth_percentile}%"),
-        dbc.CardFooter(county)
+        dbc.CardFooter("3-year average increase of microbusinesses in county relative to other US counties")
     ]
     hireability_list = [
         dbc.CardHeader("Hireability index"),
         dbc.CardBody(f"{hire_percentile}%"),
-        dbc.CardFooter(county)
+        dbc.CardFooter("County percentile for percentage of population with higher education")
     ]
     return sellability_list, growth_list, hireability_list
 
