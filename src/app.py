@@ -13,7 +13,7 @@ from components.map_view import (
 
 
 # data wrangling for filter & sidebar
-df = pd.read_csv("data/processed/smb_enriched_2.csv",dtype={'cfips_fixed': str, 'cfips': str})  
+df = pd.read_csv("data/processed/smb_enriched.csv",dtype={'cfips_fixed': str, 'cfips': str})  
 df['cfips_fixed'] = df['cfips_fixed'].astype(str)
 df['cfips'] = df['cfips'].astype(str)
 # Load geojson files
@@ -76,25 +76,21 @@ filter_column = [
 
 global_metrics = html.Div([
     html.H4("USA-wide Metrics", style={'textAlign': 'center', 'fontSize': '21px', 'marginBottom': '25px'}),
-
     html.Div([
         html.H6("Total Microbusinesses", style={'marginBottom': '5px', 'fontSize': '16px'}),
-        html.Hr(style={'border': '1px solid #ccc', 'width': '80%', 'margin': '10px auto'}),  
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"{total_microbusinesses:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
-    ], style={'textAlign': 'center', 'backgroundColor': '#f8f9fa', 'padding': '12px', 'borderRadius': '10px', 'marginBottom': '25px'}),
-
+    ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
         html.H6("Avg. Microbusiness Density", style={'marginBottom': '5px', 'fontSize': '16px'}),
-        html.Hr(style={'border': '1px solid #ccc', 'width': '80%', 'margin': '10px auto'}),  
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"{weighted_microbusiness_density:.2f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
-    ], style={'textAlign': 'center', 'backgroundColor': '#f8f9fa', 'padding': '12px', 'borderRadius': '10px', 'marginBottom': '25px'}),
-
+    ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
         html.H6("Median Household Income", style={'marginBottom': '5px', 'fontSize': '16px'}),
-        html.Hr(style={'border': '1px solid #ccc', 'width': '80%', 'margin': '10px auto'}),  
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
         html.P(f"${median_income:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
-    ], style={'textAlign': 'center', 'backgroundColor': '#f8f9fa', 'padding': '12px', 'borderRadius': '10px', 'marginBottom': '25px'}),
-
+    ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
 ], style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '100%'})
 
 map = dcc.Graph(id='map-placeholder', style={'height': '550px'})
