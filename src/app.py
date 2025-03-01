@@ -169,6 +169,35 @@ def update_BI_cards(county):
     hire_percentile = round(np.searchsorted(sort_hire,county_education,side = "right")/ len(sort_hire)*100 , 2)
 
 
+    # calculating growth index
+    growth_df = df.copy()
+    #create data frame of counties with number of businesses in each year
+    growth_df = growth_df[["county","state", "first_day_of_month","active"]]
+    growth_df["first_day_of_month"] = pd.to_datetime(growth_df["first_day_of_month"])
+    growth_df["year"] = growth_df["first_day_of_month"].dt.year
+    growth_df["month"] = growth_df["first_day_of_month"].dt.month
+    growth_df = growth_df[growth_df["month"] == 10]
+    growth_df = growth_df[["county", "state", "active", "year"]]
+    growth_df = growth_df.pivot(index=["county", "state"], columns = "year", values="active")
+    growth_df = growth_df.reset_index()
+    growth_df.columns = growth_df.columns.astype(str)
+
+    # Calculate percent change between years
+    growth_df['pct_change_2019_2020'] = (growth_df['2020'] - growth_df['2019']) / growth_df['2019'] * 100
+    growth_df['pct_change_2020_2021'] = (growth_df['2021'] - growth_df['2020']) / growth_df['2020'] * 100
+    growth_df['pct_change_2021_2022'] = (growth_df['2022'] - growth_df['2021']) / growth_df['2021'] * 100
+
+    # Calculate the average percent change across these years
+    growth_df['mean_pct_change'] = growth_df[['pct_change_2019_2020', 'pct_change_2020_2021', 'pct_change_2021_2022']].mean(axis=1)
+    growth_df = growth_df[["county", "state", "mean_pct_change"]]
+
+    county_growth = growth_df[growth_df["county"] == county]["mean_pct_change"].iloc[0]
+    clean_growth = growth_df.dropna()
+    sort_growth = np.sort(clean_growth["mean_pct_change"])
+    growth_percentile = round(np.searchsorted(sort_growth, county_growth, side = "right")/ len(sort_growth)*100, 2)
+
+
+
     sellability_list = [
         dbc.CardHeader("Sellability index"),
         dbc.CardBody(f"{sell_percentile}%"),
@@ -176,7 +205,7 @@ def update_BI_cards(county):
     ]
     competition_list = [
         dbc.CardHeader("Growth index"),
-        dbc.CardBody(county),
+        dbc.CardBody(f"{growth_percentile}%"),
         dbc.CardFooter(county)
     ]
     hireability_list = [
