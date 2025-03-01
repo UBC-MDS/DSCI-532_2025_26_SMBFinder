@@ -142,18 +142,18 @@ def update_BI_cards(county):
     if not county:
         sellability_empty = [
             dbc.CardHeader("Sellability index"),
-            dbc.CardBody(""),
-            dbc.CardFooter("County percentile for median income relative to all other counties")
+            dbc.CardBody("[Select a county]"),
+            dbc.CardFooter("County percentile median income", style={'fontSize': '12px'})
         ]
         growth_empty = [
             dbc.CardHeader("Growth index"),
-            dbc.CardBody(""),
-            dbc.CardFooter("3-year average increase of microbusinesses in county relative to other US counties")
+            dbc.CardBody("[Select a county]"),
+            dbc.CardFooter("county percentile for average yealy Microbusiness growth",style={'fontSize': '12px'})
         ]
         hireability_empty = [
             dbc.CardHeader("Hireability index"),
-            dbc.CardBody(""),
-            dbc.CardFooter("County percentile for percentage of population with higher education")
+            dbc.CardBody("[Select a county]"),
+            dbc.CardFooter("County percentile for percent of population with bachelors degree", style={'fontSize': '12px'})
         ]
         return sellability_empty, growth_empty, hireability_empty
     
@@ -209,17 +209,17 @@ def update_BI_cards(county):
     sellability_list = [
         dbc.CardHeader("Sellability index"),
         dbc.CardBody(f"{sell_percentile}%"),
-        dbc.CardFooter("County percentile for median income relative to all other counties")
+        dbc.CardFooter("County percentile median income", style={'fontSize': '12px'})
     ]
     growth_list = [
         dbc.CardHeader("Growth index"),
         dbc.CardBody(f"{growth_percentile}%"),
-        dbc.CardFooter("3-year average increase of microbusinesses in county relative to other US counties")
+        dbc.CardFooter("county percentile for average yealy Microbusiness growth", style={'fontSize': '12px'})
     ]
     hireability_list = [
         dbc.CardHeader("Hireability index"),
         dbc.CardBody(f"{hire_percentile}%"),
-        dbc.CardFooter("County percentile for percentage of population with higher education")
+        dbc.CardFooter("County percentile for percent of population with bachelors degree", style={'fontSize': '12px'})
     ]
     return sellability_list, growth_list, hireability_list
 
