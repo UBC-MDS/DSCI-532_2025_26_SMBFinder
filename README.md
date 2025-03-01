@@ -2,7 +2,7 @@
 
 ## Summary
 
-`SMBFinder` (Smart Microbusiness Finder) is a data-driven dashboard designed to help entrepreneurs and microbusiness owners identify optimal locations to start their business across the United States. Users can visualize microbusiness density through a heatmap, filter data by state and county, and analyze historical trends in microbusiness growth and workforce availability. The dashboard provides insights into competition levels, median income trends, and other key business indicators. Users can leverage these insights to make informed decisions, reduce risks, and strategically expand their business in the most promising locations.
+`SMBFinder` (Smart Microbusiness Finder) is a data-driven dashboard designed to help entrepreneurs and microbusiness owners identify optimal locations to start their business across the United States. Users can visualize microbusiness density through a heatmap, filter data by state and county, and analyze historical trends in microbusiness growth. The dashboard provides insights into competition levels, median income trends, and other key business indicators. Users can leverage these insights to make informed decisions, reduce risks, and strategically expand their business in the most promising locations.
 
 This document introduces the project, its purpose, and how you can get involved—whether as a user, contributor, or developer. Jump to one of the sections below to learn more:
 
@@ -60,7 +60,7 @@ Entrepreneurs, Small Business Owners, Investors, and Economic Policymakers.
 
 ### Live Demo:
 
-[SMBFinder Dashboard](https://dsci-532-2025-24-smbfinder.onrender.com/)
+[SMBFinder Dashboard](https://dsci-532-2025-26-smbfinder.onrender.com/)
 
 ### Demo GIF:
 
@@ -93,7 +93,7 @@ python src/app.py
 
 #### Step 4: Start contributing!
 
-- Report issues or suggest enhancements in GitHub Issues: [SMBFinder Issues](https://github.com/UBC-MDS/DSCI-532_2025_24_smbfinder/issues)
+- Report issues or suggest enhancements in GitHub Issues: [SMBFinder Issues](https://github.com/UBC-MDS/DSCI-532_2025_26_SMBFinder/issues)
 - Share feedback on documentation and dataset usage.
 
 ---
