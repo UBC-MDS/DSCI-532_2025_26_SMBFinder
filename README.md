@@ -75,7 +75,7 @@ Read our **Contributing Guide** to get started!
 #### Step 1: Clone the repository
 
 ```sh
-git clone https://github.com/UBC-MDS/DSCI-532_2025_24_smbfinder.git
+git clone https://github.com/UBC-MDS/DSCI-532_2025_26_smbfinder.git
 cd your-repo-folder
 ```
 
