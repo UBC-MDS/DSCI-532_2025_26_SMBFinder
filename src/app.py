@@ -159,6 +159,15 @@ def update_BI_cards(county):
     sort_sell = np.sort(clean_sell[f"median_hh_inc_{latest_year}"])
     sell_percentile = round(np.searchsorted(sort_sell,county_income,side = "right")/ len(sort_sell)*100 , 2)
 
+    #calculating Hireability index
+    #note: brown county returns different value on app than in testing. look into
+    county_education = df[df["county"] == county][f"pct_college_{latest_year}"].iloc[0]
+    hire_df = df[df["first_day_of_month"] == latest_date]
+    hire_df = hire_df[[f"pct_college_{latest_year}"]]
+    clean_hire = hire_df.dropna()
+    sort_hire = np.sort(clean_hire[f"pct_college_{latest_year}"])
+    hire_percentile = round(np.searchsorted(sort_hire,county_education,side = "right")/ len(sort_hire)*100 , 2)
+
 
     sellability_list = [
         dbc.CardHeader("Sellability index"),
@@ -172,7 +181,7 @@ def update_BI_cards(county):
     ]
     hireability_list = [
         dbc.CardHeader("Hireability index"),
-        dbc.CardBody(county),
+        dbc.CardBody(f"{hire_percentile}%"),
         dbc.CardFooter(county)
     ]
     return sellability_list, competition_list, hireability_list
