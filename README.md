@@ -35,7 +35,7 @@ By providing a structured data-driven approach, SMBFinder helps business owners,
 
 ## Who are we?
 
-The **SMBFinder** project is developed by a team of Master of Data Science Students at University of British Columbia. Contributors include **Anna Nandar, Dongchun Chen, Jiayi Li, and Marek Boulerice**, as part of the **UBC DSCI 532 Capstone project**. 
+The **SMBFinder** project is developed by a team of Master of Data Science Students at University of British Columbia. Contributors include **Anna Nandar, Dongchun Chen, Jiayi Li, and Marek Boulerice**, as part of the **UBC DSCI 532 Data Visualization II project**. 
 
 ---
 
