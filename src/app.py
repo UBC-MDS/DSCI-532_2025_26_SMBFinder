@@ -5,42 +5,28 @@ import altair as alt
 import pandas as pd
 import numpy as np
 import json
-try:
-    from components.map_view import (
+
+from .components.data_processing import generate_df
+
+# Generate and unpack processed data
+data = generate_df()
+df = data["df"]
+unique_states = data["unique_states"]
+state_county_mapping = data["state_county_mapping"]
+total_microbusinesses = data["total_microbusinesses"]
+weighted_microbusiness_density = data["weighted_microbusiness_density"]
+median_income = data["median_income"]
+numeric_columns = data["numeric_columns"]
+
+from .components.filters import create_filters
+from .components.sidebar import create_sidebar
+
+from .components.map_view import (
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
         display_county_level_map,
         fix_cfips
     )
-except ModuleNotFoundError:
-    from src.components.map_view import (
-        display_landing_page_map_choropleth_counties,
-        display_state_level_map,
-        display_county_level_map,
-        fix_cfips
-    )
-
-# data wrangling for filter, sidebar & map
-df = pd.read_csv("data/processed/data_details_smb.csv",dtype={'cfips_fixed': str, 'cfips': str})  
-
-unique_states = sorted(df["state"].unique())
-state_county_mapping = df.groupby("state")["county"].unique().apply(list).to_dict()
-
-total_microbusinesses = df["active"].sum()  
-df["adult_population"] = (df["active"] / df["microbusiness_density"]) * 100
-weighted_microbusiness_density = (df["microbusiness_density"] * df["adult_population"]).sum() / df["adult_population"].sum()
-
-latest_year = "2021"  
-df = df.sort_values(by=f"median_hh_inc_{latest_year}")  
-df["cumulative_population"] = df["adult_population"].cumsum()  
-total_population = df["adult_population"].sum()
-median_income = df[df["cumulative_population"] >= total_population / 2][f"median_hh_inc_{latest_year}"].iloc[0]
-
-numeric_columns = ["growth_index", "sellability_index",  "hireability_index","microbusiness_density", ]
-
-df['cfips_fixed'] = df['cfips_fixed'].astype(str)
-df['cfips'] = df['cfips'].astype(str)
-df['cfips_fixed'] = df['cfips_fixed'].apply(fix_cfips)
 
 # Load geojson files
 with open("data/raw/us-states.json") as f:
@@ -56,57 +42,8 @@ server = app.server
 #initialize app variables
 title = [html.H1('SMBFinder - Explore Microbusinesses around the United States'), html.Br()]
 
-filter_state = [
-    dbc.Label("Select a State"),
-    dcc.Dropdown(
-        id='state-dropdown',
-        options=[{"label": state, "value": state} for state in unique_states], 
-        placeholder='Select up to 3 States',
-        multi=True,  
-        style={'width': '200px', 'fontSize': '15px'}
-    ),
-]
-
-filter_county = [
-    dbc.Label("Select a County"),
-    dcc.Dropdown(
-        id='county-dropdown',
-        placeholder='Select up to 3 Counties',
-        multi=True,  
-        style={'width': '260px', 'fontSize': '15px'},
-        disabled=True  # Default is disabled, will be enabled based on state selection
-    ),
-]
-
-# Add new dropdown for selecting "color by"
-filter_column = [
-    dbc.Label("Color by"),
-    dcc.Dropdown(
-        id='column-dropdown',
-        options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
-        value='growth_index',  # Default value
-        style={'width': '215px', 'fontSize': '15px'}
-    ),
-]
-
-global_metrics = html.Div([
-    html.H4("USA-wide Metrics", style={'textAlign': 'center', 'fontSize': '20px', 'marginBottom': '25px'}),
-    html.Div([
-        html.H6("Total Microbusinesses", style={'marginBottom': '7px', 'fontSize': '17px'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '20px auto'}),
-        html.P(f"{total_microbusinesses:,.0f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
-    ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
-    html.Div([
-        html.H6("Avg. Microbusiness Density", style={'marginBottom': '7px', 'fontSize': '17px'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '20px auto'}),
-        html.P(f"{weighted_microbusiness_density:.2f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
-    ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
-    html.Div([
-        html.H6("Median Household Income", style={'marginBottom': '7px', 'fontSize': '17px'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '20px auto'}),
-        html.P(f"${median_income:,.0f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
-    ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
-], style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '90%'})
+filter_state, filter_county, filter_column = create_filters(unique_states, numeric_columns)
+global_metrics = create_sidebar(total_microbusinesses, weighted_microbusiness_density, median_income)
 
 map = dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
 
@@ -466,4 +403,4 @@ def update_BI_cards(county):
     return sellability_list, growth_list, hireability_list
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8001, host='127.0.0.1')
+    app.run_server(debug=False, port=8001, host='127.0.0.1')
