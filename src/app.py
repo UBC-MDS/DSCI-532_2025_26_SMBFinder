@@ -1,7 +1,6 @@
-from dash import Dash, dcc, callback, Output, Input, html, dash_table, dash_table
+from dash import Dash, dcc, callback, Output, Input, html, dash_table
 import dash_bootstrap_components as dbc
 import dash_vega_components as dvc
-import altair as altimport 
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -23,19 +22,8 @@ except ModuleNotFoundError:
         fix_cfips
     )
 
-# data wrangling for filter & sidebar
-df = pd.read_csv("data/processed/smb_enriched.csv",dtype={'cfips_fixed': str, 'cfips': str})  
-df['cfips_fixed'] = df['cfips_fixed'].astype(str)
-df['cfips'] = df['cfips'].astype(str)
-df['cfips_fixed'] = df['cfips_fixed'].apply(fix_cfips)
-
-
-# Load geojson files
-with open("data/raw/us-states.json") as f:
-    states_geojson = json.load(f)
-
-with open("data/raw/geojson-counties-fips.json") as f:
-    counties_geojson = json.load(f)
+# data wrangling for filter, sidebar & map
+df = pd.read_csv("data/processed/data_details_smb.csv",dtype={'cfips_fixed': str, 'cfips': str})  
 
 unique_states = sorted(df["state"].unique())
 state_county_mapping = df.groupby("state")["county"].unique().apply(list).to_dict()
@@ -50,6 +38,19 @@ df["cumulative_population"] = df["adult_population"].cumsum()
 total_population = df["adult_population"].sum()
 median_income = df[df["cumulative_population"] >= total_population / 2][f"median_hh_inc_{latest_year}"].iloc[0]
 
+numeric_columns = ["microbusiness_density", "sellability_index", "growth_index", "hireability_index"]
+
+df['cfips_fixed'] = df['cfips_fixed'].astype(str)
+df['cfips'] = df['cfips'].astype(str)
+df['cfips_fixed'] = df['cfips_fixed'].apply(fix_cfips)
+
+# Load geojson files
+with open("data/raw/us-states.json") as f:
+    states_geojson = json.load(f)
+
+with open("data/raw/geojson-counties-fips.json") as f:
+    counties_geojson = json.load(f)
+
 #initialize app
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
@@ -57,74 +58,57 @@ server = app.server
 #initialize app variables
 title = [html.H1('SMBFinder - Explore Microbusinesses around the United States'), html.Br()]
 
-# Get numeric columns for the dropdown
-numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
-# Filter out any columns you don't want to include
-numeric_columns = ['microbusiness_density']
-
-# Get numeric columns for the dropdown
-numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
-# Filter out any columns you don't want to include
-numeric_columns = ['microbusiness_density']
-
 filter_state = [
     dbc.Label("Select a State"),
     dcc.Dropdown(
         id='state-dropdown',
         options=[{"label": state, "value": state} for state in unique_states], 
-        placeholder='Select a State',
-        style={'width': '200px'}
+        placeholder='Select up to 3 States',
+        multi=True,  
+        style={'width': '200px', 'fontSize': '15px'}
     ),
 ]
 
 filter_county = [
     dbc.Label("Select a County"),
-    dcc.Dropdown(id='county-dropdown', placeholder='Select a County', style={'width': '200px'}),
-]
-
-# Add new dropdown for selecting numeric column
-filter_column = [
-    dbc.Label("Select Data to Display"),
     dcc.Dropdown(
-        id='column-dropdown',
-        options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
-        value='microbusiness_density',  # Default value
-        style={'width': '200px'}
+        id='county-dropdown',
+        placeholder='Select up to 3 Counties',
+        multi=True,  
+        style={'width': '260px', 'fontSize': '15px'},
+        disabled=True  # Default is disabled, will be enabled based on state selection
     ),
 ]
 
-# Add new dropdown for selecting numeric column
+# Add new dropdown for selecting "color by"
 filter_column = [
-    dbc.Label("Select Data to Display"),
+    dbc.Label("Color by"),
     dcc.Dropdown(
         id='column-dropdown',
         options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
         value='microbusiness_density',  # Default value
-        style={'width': '200px'}
+        style={'width': '215px', 'fontSize': '15px'}
     ),
 ]
 
 global_metrics = html.Div([
-    html.H4("USA-wide Metrics", style={'textAlign': 'center', 'fontSize': '21px', 'marginBottom': '25px'}),
+    html.H4("USA-wide Metrics", style={'textAlign': 'center', 'fontSize': '20px', 'marginBottom': '25px'}),
     html.Div([
-        html.H6("Total Microbusinesses", style={'marginBottom': '5px', 'fontSize': '16px'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
-        html.P(f"{total_microbusinesses:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
+        html.H6("Total Microbusinesses", style={'marginBottom': '7px', 'fontSize': '17px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '20px auto'}),
+        html.P(f"{total_microbusinesses:,.0f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
-        html.H6("Avg. Microbusiness Density", style={'marginBottom': '5px', 'fontSize': '16px'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
-        html.P(f"{weighted_microbusiness_density:.2f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
+        html.H6("Avg. Microbusiness Density", style={'marginBottom': '7px', 'fontSize': '17px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '20px auto'}),
+        html.P(f"{weighted_microbusiness_density:.2f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     html.Div([
-        html.H6("Median Household Income", style={'marginBottom': '5px', 'fontSize': '16px'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
-        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '10px auto'}),
-        html.P(f"${median_income:,.0f}", style={'fontSize': '18px', 'fontWeight': 'bold', 'marginTop': '5px'})
+        html.H6("Median Household Income", style={'marginBottom': '7px', 'fontSize': '17px'}),
+        html.Hr(style={'border': '1px solid #AAC8E4', 'width': '80%', 'margin': '20px auto'}),
+        html.P(f"${median_income:,.0f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
-], style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '100%'})
+], style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '90%'})
 
 map = dcc.Graph(id='map-placeholder', style={'height': '550px'})
 
@@ -160,7 +144,7 @@ app.layout = dbc.Container([
                             dbc.Col(filter_state),
                             dbc.Col(filter_county),
                             dbc.Col(filter_column),  # Add the new dropdown here
-                    ]),
+                    ], className="g-1"),
                     dbc.Row(map)
                 ], md=9),
         ]),
@@ -190,13 +174,34 @@ app.layout = dbc.Container([
 ])
 
 @app.callback(
+    Output("state-dropdown", "options"),
     Output("county-dropdown", "options"),
+    Output("county-dropdown", "disabled"),
     Input("state-dropdown", "value")
 )
-def update_county_dropdown(selected_state):
-    if not selected_state:
-        return []
-    return [{"label": county, "value": county} for county in state_county_mapping[selected_state]]  
+def limit_selections(selected_states):
+    """Limit state selection to 3 and allow multiple counties only if one state is chosen."""
+
+    # Ensure state selection is limited to 3
+    updated_state_options = [
+        {"label": state, "value": state, "disabled": selected_states and len(selected_states) >= 3}
+        for state in unique_states
+    ]
+
+    available_counties = []
+    county_disabled = True  # Default: disabled
+
+    if selected_states and len(selected_states) == 1:
+        # Ensure the selected state exists in the mapping
+        available_counties = state_county_mapping.get(selected_states[0], [])
+        county_disabled = False  # Enable dropdown if exactly 1 state is selected
+
+    updated_county_options = [
+        {"label": county, "value": county, "disabled": False}
+        for county in available_counties
+    ]
+
+    return updated_state_options, updated_county_options, county_disabled
 
 @app.callback(
     Output("map-placeholder", "figure"),
@@ -460,4 +465,4 @@ def update_BI_cards(county):
 
 if __name__ == '__main__':
     #app.run(debug = True)
-    app.server.run(port= 8001, host='127.0.0.1')
+    app.run(port= 8001, host='127.0.0.1')
