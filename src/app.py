@@ -6,14 +6,17 @@ import pandas as pd
 import numpy as np
 import json
 
-from .components.data_processing import (
-    df, 
-    unique_states, 
-    state_county_mapping, 
-    total_microbusinesses,
-    weighted_microbusiness_density, 
-    median_income, 
-    numeric_columns)
+from .components.data_processing import generate_df
+
+# Generate and unpack processed data
+data = generate_df()
+df = data["df"]
+unique_states = data["unique_states"]
+state_county_mapping = data["state_county_mapping"]
+total_microbusinesses = data["total_microbusinesses"]
+weighted_microbusiness_density = data["weighted_microbusiness_density"]
+median_income = data["median_income"]
+numeric_columns = data["numeric_columns"]
 
 from .components.filters import create_filters
 from .components.sidebar import create_sidebar
