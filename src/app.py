@@ -8,7 +8,6 @@ import numpy as np
 import json
 try:
     from components.map_view import (
-        display_landing_page_map_dots,
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
         display_county_level_map,
@@ -16,7 +15,6 @@ try:
     )
 except ModuleNotFoundError:
     from src.components.map_view import (
-        display_landing_page_map_dots,
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
         display_county_level_map,
@@ -57,14 +55,6 @@ server = app.server
 #initialize app variables
 title = [html.H1('SMBFinder - Explore Microbusinesses around the United States'), html.Br()]
 
-# Get numeric columns for the dropdown
-numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
-# Filter out any columns you don't want to include
-numeric_columns = ['microbusiness_density']
-
-# Get numeric columns for the dropdown
-numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
-# Filter out any columns you don't want to include
 numeric_columns = ['microbusiness_density']
 
 filter_state = [
@@ -126,7 +116,7 @@ global_metrics = html.Div([
     ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
 ], style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '100%'})
 
-map = dcc.Graph(id='map-placeholder', style={'height': '550px'})
+map = dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
 
 chart_SMB_density = [
     dvc.Vega(id='density-placeholder', spec={'height': '230px'})  
@@ -161,7 +151,8 @@ app.layout = dbc.Container([
                             dbc.Col(filter_county),
                             dbc.Col(filter_column),  # Add the new dropdown here
                     ]),
-                    dbc.Row(map)
+                    # Put map in its own Row for proper alignment
+                    dbc.Row(dbc.Col(map, className="p-0")),  # Added p-0 class to remove padding
                 ], md=9),
         ]),
 
@@ -238,8 +229,15 @@ def update_map(selected_state, selected_county, selected_column):
     else:
         fig = display_landing_page_map_choropleth_counties(filtered_df, counties_geojson, 0.7, 'cfips_fixed', column_to_display)
     
-    # Remove the legend
-    fig.update_layout(showlegend=False, coloraxis_showscale=False)
+    # Enable the colorbar (legend) for choropleth maps
+    fig.update_layout(
+        showlegend=False,  # This is for discrete legends, not needed for choropleth
+        coloraxis_showscale=True,  # This enables the colorbar
+        margin={"r":150, "t":20, "l":20, "b":20},  # Increased right margin for the colorbar
+        height=550,  # Match the container height
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+        plot_bgcolor='rgba(0,0,0,0)'    # Transparent plot area
+    )
     
     return fig
 
@@ -460,4 +458,4 @@ def update_BI_cards(county):
 
 if __name__ == '__main__':
     #app.run(debug = True)
-    app.server.run(port= 8001, host='127.0.0.1')
+    app.server.run(debug=True, port= 8001, host='127.0.0.1' )
