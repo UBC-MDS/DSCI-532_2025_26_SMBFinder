@@ -1,7 +1,6 @@
 import plotly.express as px
 import pandas as pd
 
-# Define consistent hover data and labels to be used across all map functions
 def get_hover_data():
     return {
         'state': True,
@@ -42,201 +41,131 @@ def get_tooltip_descriptions():
         'pct_it_workers_2021': 'Percentage of workforce employed in information related industries'
     }
 
-def display_landing_page_map_dots(enriched_df):
+def get_legend_margin():
+    return {"r":0,"t":0,"l":0,"b":0}
 
+def _configure_colorbar(fig, color_col):
+    """Helper function to configure the colorbar based on the color column."""
+    # Get the display name from the labels dictionary, or use a formatted version of the column name
+    display_name = get_labels().get(color_col, color_col.replace('_', ' ').title())
+    
+    # Don't show description.
+    title_text = display_name
+    
+    fig.update_layout(
+        coloraxis_colorbar=dict(
+            title=dict(
+                text=title_text,
+                font=dict(size=14)
+            ),
+            thicknessmode="pixels", 
+            thickness=25,
+            lenmode="fraction", 
+            len=0.8,
+            ticks="outside",
+            ticklen=5,
+            outlinewidth=1,
+            outlinecolor="black",
+            x=1.02,
+            y=0.5
+        ),
+        margin=get_legend_margin()
+    )
+    return fig
 
-    """
-    (1)
-    Initially, start with the map of the US. 
-    - Maybe general Choropleth
-    - Year slider on the top, Choropleth by the average microbusiness density
-
-    OR
-    - General map of the US. Center points of the counties are shown. So, each county is condensed into the middle point.
-    - Plot all the points on the map where the county has a microbusiness density above average.
-    - Year slider on the bottom.
-
-    (2)
-    All the geojson is in county level. 
-    - Can it be Choropleth by county? 
-    - So, filter by State, so that state is highlighted, else is grey. Then, a Choropleth by county for that state only.
-
-
-    Stretch goals:
-    - Have map to be selectable, so when a map is clicked, the selection propagates to the charts below.
-
-
-    Implementation:
-    Input: microbusiness dataset, geojson file by county
-
-    1. 
-
-    Output: Map of the US. 
-
-
-
-    """
-
-    fig = px.scatter_geo(
-        enriched_df,
-        lat='centroid_lat',
-        lon='centroid_lng',
-        scope='usa',
-        color='microbusiness_density',
-        size='active',
-        hover_name='county',
-        hover_data=get_hover_data(),
-        color_continuous_scale='Viridis',
+def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom, opacity):
+    """Create a base choropleth map with common settings."""
+    center_lat = data_df['centroid_lat'].mean()
+    center_lon = data_df['centroid_lng'].mean()
+    
+    fig = px.choropleth_map(
+        data_df, 
+        geojson=geojson_file, 
+        locations=location_col, 
+        color=color_col,
+        color_continuous_scale="Blackbody",
+        map_style="carto-positron",
+        zoom=zoom, 
+        center={"lat": center_lat, "lon": center_lon},
+        opacity=opacity,
+        range_color=(0, 100),
         labels=get_labels(),
-        title='US Counties Microbusiness Density'
+        hover_data=get_hover_data()
+    )
+    
+    return _configure_colorbar(fig, color_col)
+
+def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile, location_col, color_col):
+    percentile_filtered = enriched_df['microbusiness_density'].quantile(percentile)
+    high_density_counties = enriched_df[enriched_df['microbusiness_density'] > percentile_filtered]
+    
+    fig = _create_base_choropleth(
+        high_density_counties, 
+        geojson_file, 
+        location_col, 
+        color_col, 
+        zoom=3, 
+        opacity=0.5
     )
 
     fig.update_layout(
-        mapbox_style="carto-positron",
-        margin={"r":0,"t":50,"l":0,"b":0},
-        uirevision='constant',
-        hovermode='closest',
-        coloraxis_colorbar=dict(
-            title=get_tooltip_descriptions()['microbusiness_density']
+        legend=dict(
+            x=0,
+            y=1,
+            traceorder="reversed",
+            title_font_family="Times New Roman",
+            font=dict(
+                family="Courier",
+                size=12,
+                color="black"
+            ),
+            bgcolor="LightSteelBlue",
+            bordercolor="Black",
+            borderwidth=2
         )
     )
-
-
-    return fig
-
-def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile, location_col, color_col):
-
-    percentile_filtered = enriched_df['microbusiness_density'].quantile(percentile)
-
-    high_density_counties = enriched_df[enriched_df['microbusiness_density'] > percentile_filtered]
-
-
-    # Display the filtered data
-    # high_density_counties
-
-    center_lat = enriched_df['centroid_lat'].mean()
-    center_lon = enriched_df['centroid_lng'].mean()
-
-    
-    fig = px.choropleth_map(high_density_counties, geojson=geojson_file, locations=location_col, color=color_col,
-                           color_continuous_scale="Viridis",
-                           range_color=(0, 12),
-                           map_style="carto-positron",
-                           zoom=3, center = {"lat": center_lat, "lon": center_lon},
-                           opacity=0.5,
-                           labels=get_labels(),
-                           hover_data=get_hover_data()
-                          )
-
-    # fig.update_geos(showsubunits=True, subunitcolor="Black")
-    
-    # Add tooltip description to the colorbar title
-    if color_col in get_tooltip_descriptions():
-        fig.update_layout(
-            coloraxis_colorbar=dict(
-                title=get_tooltip_descriptions()[color_col]
-            )
-        )
-
-    return fig 
-
-def display_landing_page_map_choropleth_states(enriched_df, geojson_file, percentile, location_col, color_col):
-
-    percentile_filtered = enriched_df[color_col].quantile(percentile)
-
-    high_density_counties = enriched_df[enriched_df[color_col] > percentile_filtered]
-
-    # Display the filtered data
-    # high_density_counties
-
-    center_lat = enriched_df['centroid_lat'].mean()
-    center_lon = enriched_df['centroid_lng'].mean()
-
-    fig = px.choropleth_map(high_density_counties, geojson=geojson_file, locations=location_col, 
-    color=color_col,
-                           color_continuous_scale="Viridis",
-                           range_color=(0, 12),
-                           map_style="carto-positron",
-                           zoom=3, center = {"lat": center_lat, "lon": center_lon},
-                           opacity=0.5,
-                           labels=get_labels(),
-                           hover_data=get_hover_data()
-                          )
-
-    # fig.update_geos(showsubunits=True, subunitcolor="Black")
-    
-    # Add tooltip description to the colorbar title
-    if color_col in get_tooltip_descriptions():
-        fig.update_layout(
-            coloraxis_colorbar=dict(
-                title=get_tooltip_descriptions()[color_col]
-            )
-        )
 
     return fig 
 
 def display_state_level_map(enriched_df, geojson_file, location_col, color_col):
-
-    center_lat = enriched_df['centroid_lat'].mean()
-    center_lon = enriched_df['centroid_lng'].mean()
-
-    # Filter the data for the specific state
-    fig = px.choropleth_map(enriched_df, geojson=geojson_file, locations=location_col, color=color_col,
-                           color_continuous_scale="Viridis",
-                           range_color=(0, 12),
-                           map_style="carto-positron",
-                           zoom=3, center = {"lat": center_lat, "lon": center_lon},
-                           opacity=0.5,
-                           labels=get_labels(),
-                           hover_data=get_hover_data()
-                          )
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    
-    # Add tooltip description to the colorbar title
-    if color_col in get_tooltip_descriptions():
-        fig.update_layout(
-            coloraxis_colorbar=dict(
-                title=get_tooltip_descriptions()[color_col]
-            )
-        )
-    
-    return fig
-
-
-def display_county_level_map(enriched_df, geojson_file, location_col, color_col):
-    
-    center_lat = enriched_df['centroid_lat'].mean()
-    center_lon = enriched_df['centroid_lng'].mean()
-
-    fig = px.choropleth_map(enriched_df, geojson=geojson_file, locations=location_col, color=color_col,
-                           color_continuous_scale="Viridis",
-                           range_color=(0, 12),
-                           map_style="carto-positron",
-                           zoom=8, center = {"lat": center_lat, "lon": center_lon},
-                           opacity=0.8,
-                           labels=get_labels(),
-                           hover_data=get_hover_data()
-                          )
-    
-    # Add tooltip description to the colorbar title
-    if color_col in get_tooltip_descriptions():
-        fig.update_layout(
-            margin={"r":0,"t":0,"l":0,"b":0},
-            coloraxis_colorbar=dict(
-                title=get_tooltip_descriptions()[color_col]
-            )
+    if enriched_df['state'].nunique() > 1:
+        return _create_base_choropleth(
+            enriched_df, 
+            geojson_file, 
+            location_col, 
+            color_col, 
+            zoom=3, 
+            opacity=0.5
         )
     else:
-        fig.update_layout(
-            margin={"r":0,"t":0,"l":0,"b":0},
-            coloraxis_colorbar=dict(
-                title="Microbusiness Density"
-            )
+        return _create_base_choropleth(
+            enriched_df, 
+            geojson_file, 
+            location_col, 
+            color_col, 
+            zoom=5, 
+            opacity=0.5
         )
-    
-    return fig
 
+def display_county_level_map(enriched_df, geojson_file, location_col, color_col):
 
-
+    if enriched_df['county'].nunique() > 1:
+        return _create_base_choropleth(
+                enriched_df, 
+                geojson_file, 
+                location_col, 
+                color_col, 
+                zoom=6, 
+                opacity=0.5
+            )
+    else:
+        return _create_base_choropleth(
+            enriched_df, 
+            geojson_file, 
+            location_col, 
+            color_col, 
+            zoom=8, 
+            opacity=0.5
+        )
 def fix_cfips(cfips):
     return str(cfips).zfill(5)
