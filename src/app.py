@@ -36,7 +36,7 @@ df["cumulative_population"] = df["adult_population"].cumsum()
 total_population = df["adult_population"].sum()
 median_income = df[df["cumulative_population"] >= total_population / 2][f"median_hh_inc_{latest_year}"].iloc[0]
 
-numeric_columns = ["microbusiness_density", "sellability_index", "growth_index", "hireability_index"]
+numeric_columns = ["growth_index", "sellability_index",  "hireability_index","microbusiness_density", ]
 
 df['cfips_fixed'] = df['cfips_fixed'].astype(str)
 df['cfips'] = df['cfips'].astype(str)
@@ -84,7 +84,7 @@ filter_column = [
     dcc.Dropdown(
         id='column-dropdown',
         options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
-        value='microbusiness_density',  # Default value
+        value='growth_index',  # Default value
         style={'width': '215px', 'fontSize': '15px'}
     ),
 ]
@@ -209,17 +209,18 @@ def limit_selections(selected_states):
      Input("column-dropdown", "value")]  
 )
 def update_map(selected_state, selected_county, selected_column):
-    # Start with all data
+    global df
     
-    filtered_df = df.copy()
-    filtered_df = filtered_df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
+    temp_df = df.copy()
+    temp_df = temp_df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
     
-    # Filter based on selections
     if selected_state:
         if isinstance(selected_state, list):
-            filtered_df = filtered_df[filtered_df["state"].isin(selected_state)]
+            filtered_df = temp_df[temp_df["state"].isin(selected_state)]
         else:
-            filtered_df = filtered_df[filtered_df["state"] == selected_state]
+            filtered_df = temp_df[temp_df["state"] == selected_state]
+    else:
+        filtered_df = temp_df
         
     if selected_county:
         if isinstance(selected_county, list):
@@ -229,27 +230,22 @@ def update_map(selected_state, selected_county, selected_column):
     
     filtered_df['cfips_fixed'] = filtered_df['cfips_fixed'].apply(fix_cfips)
 
-    # Default on microbusiness density for now 
-    column_to_display = selected_column if selected_column else 'microbusiness_density'
+    column_to_display = selected_column if selected_column else 'growth_index'
     
-    # If county is selected, show county level map
     if selected_county:
         fig = display_county_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
-    # If state is selected but no county
     elif selected_state:
         fig = display_state_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
-    # Default view for entire US
     else:
         fig = display_landing_page_map_choropleth_counties(filtered_df, counties_geojson, 0.7, 'cfips_fixed', column_to_display)
     
-    # Enable the colorbar (legend) for choropleth maps
     fig.update_layout(
-        showlegend=False,  # This is for discrete legends, not needed for choropleth
-        coloraxis_showscale=True,  # This enables the colorbar
-        margin={"r":150, "t":20, "l":20, "b":20},  # Increased right margin for the colorbar
-        height=550,  # Match the container height
-        paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
-        plot_bgcolor='rgba(0,0,0,0)'    # Transparent plot area
+        showlegend=False,
+        coloraxis_showscale=True,
+        margin={"r":150, "t":20, "l":20, "b":20},
+        height=550,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     
     return fig
@@ -470,5 +466,4 @@ def update_BI_cards(county):
     return sellability_list, growth_list, hireability_list
 
 if __name__ == '__main__':
-    #app.run(debug = True)
-    app.server.run(debug=True, port= 8001, host='127.0.0.1' )
+    app.run_server(debug=True, port=8001, host='127.0.0.1')
