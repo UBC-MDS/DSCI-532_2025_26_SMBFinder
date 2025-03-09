@@ -38,7 +38,7 @@ def create_filters(unique_states, numeric_columns):
 
     return filter_state, filter_county, filter_column
 
-def limit_selections(selected_states):
+def limit_selections(selected_states, unique_states, state_county_mapping):
     """Limit state selection to 3 and allow multiple counties only if one state is chosen."""
 
     # Ensure state selection is limited to 3
