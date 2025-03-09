@@ -42,10 +42,11 @@ app.layout = create_layout(unique_states, numeric_columns, total_microbusinesses
     Output("state-dropdown", "options"),
     Output("county-dropdown", "options"),
     Output("county-dropdown", "disabled"),
-    Input("state-dropdown", "value")
+    Input("state-dropdown", "value"),
+    Input("county-dropdown", "value")
 )
-def update_filter_options(selected_states):
-    return limit_selections(selected_states, unique_states, state_county_mapping)
+def update_filter_options(selected_states, selected_counties):
+    return limit_selections(selected_states, unique_states, state_county_mapping, selected_counties)
 
 @app.callback(
     Output("map-placeholder", "figure"),
