@@ -2,7 +2,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_vega_components as dvc
 from .filters import create_filters
-from .sidebar import create_sidebar
+from .sidebar import create_sidebar, create_county_sidebar
 
 def create_layout(unique_states, numeric_columns, total_microbusinesses, weighted_microbusiness_density, median_income):
     # Title
@@ -26,6 +26,7 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
     card_sellability = dbc.Card(id="sellability")
     card_growth = dbc.Card(id="growth")
     card_hireability = dbc.Card(id="hireability")
+    county_metrics = create_county_sidebar(card_sellability, card_growth, card_hireability)
 
     # Footer / End Credits
     end_credits = html.Div([
@@ -45,9 +46,7 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                     [
                         dbc.Tab([global_metrics], label="USA"),
                         dbc.Tab([
-                            dbc.Row(card_sellability),
-                            dbc.Row(card_growth),
-                            dbc.Row(card_hireability),
+                            county_metrics
                         ], label="County")
                     ]
                 ), md=3, style={'marginTop': '30px'}
