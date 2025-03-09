@@ -74,7 +74,25 @@ end_credits = html.Div([
 app.layout = dbc.Container([
         dbc.Row(dbc.Col(title)),
         dbc.Row([
-                dbc.Col(global_metrics, md = 3, style={'marginTop': '30px'}),
+                dbc.Col(
+                    dbc.Tabs(
+                        [
+                            dbc.Tab(
+                                [
+                                    global_metrics
+                                ],
+                                label = "USA"
+                            ),
+                            dbc.Tab(
+                                [
+                                    dbc.Row(card_sellability),
+                                    dbc.Row(card_growth),
+                                    dbc.Row(card_hireability),
+                                ],
+                                label = "County"
+                            )
+                        ]
+                    ), md = 3, style={'marginTop': '30px'}),
                 dbc.Col([
                     dbc.Row([
                             dbc.Col(filter_state),
@@ -99,14 +117,7 @@ app.layout = dbc.Container([
                 dbc.Col(chart_SMB_density),
                 dbc.Col(chart_med_income),
             ]
-        ),
-        dbc.Row(
-            [
-                dbc.Col(card_sellability),
-                dbc.Col(card_growth),
-                dbc.Col(card_hireability),
-            ]
-        ),
+        ), 
         dbc.Row(end_credits)
 ])
 
