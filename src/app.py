@@ -223,10 +223,10 @@ def update_income_chart(selected_state=None, selected_county=None):
     [Output("sellability", "children"),
     Output("growth", "children"),
     Output("hireability", "children")],
-    [Input("county-dropdown", "value")]
+    [Input("state-dropdown", "value"),
+     Input("county-dropdown", "value")]
 )
-def update_BI_cards(county):
-    print(county)
+def update_BI_cards(state, county):
 
     if not county:
         sellability_empty = [
@@ -246,71 +246,38 @@ def update_BI_cards(county):
         ]
         return sellability_empty, growth_empty, hireability_empty
     
+    #creating df of filtered counties at latest date
     latest_date = "2022-10-01"
+    condition = "state in @state & county in @county & first_day_of_month == @latest_date"
+    filtered_df = df.query(condition)
 
-    #calculating sellability index
-    county_income = df[df["county"] == county][f"median_hh_inc_{latest_year}"].iloc[0]
-    sell_df = df[df["first_day_of_month"] == latest_date]
-    sell_df = sell_df[[f"median_hh_inc_{latest_year}"]]
-    clean_sell = sell_df.dropna()
-    sort_sell = np.sort(clean_sell[f"median_hh_inc_{latest_year}"])
-    sell_percentile = round(np.searchsorted(sort_sell,county_income,side = "right")/ len(sort_sell)*100 , 2)
-
-    #calculating Hireability index
-    #note: brown county returns different value on app than in testing. look into
-    county_education = df[df["county"] == county][f"pct_college_{latest_year}"].iloc[0]
-    hire_df = df[df["first_day_of_month"] == latest_date]
-    hire_df = hire_df[[f"pct_college_{latest_year}"]]
-    clean_hire = hire_df.dropna()
-    sort_hire = np.sort(clean_hire[f"pct_college_{latest_year}"])
-    hire_percentile = round(np.searchsorted(sort_hire,county_education,side = "right")/ len(sort_hire)*100 , 2)
+    #create index paragraph lists and populate with filtered df
+    sell_list = []
+    growth_list = []
+    hire_list = []
+    for i in range(len(filtered_df)):
+        county = filtered_df.iloc[i]
+        sell_list.append(html.P(f"{county['county']} : {county['sellability_index']}"))
+        growth_list.append(html.P(f"{county['county']} : {county['growth_index']}"))
+        hire_list.append(html.P(f"{county['county']} : {county['hireability_index']}"))
 
 
-    # calculating growth index
-    growth_df = df.copy()
-    #create data frame of counties with number of businesses in each year
-    growth_df = growth_df[["county","state", "first_day_of_month","active"]]
-    growth_df["first_day_of_month"] = pd.to_datetime(growth_df["first_day_of_month"])
-    growth_df["year"] = growth_df["first_day_of_month"].dt.year
-    growth_df["month"] = growth_df["first_day_of_month"].dt.month
-    growth_df = growth_df[growth_df["month"] == 10]
-    growth_df = growth_df[["county", "state", "active", "year"]]
-    growth_df = growth_df.pivot(index=["county", "state"], columns = "year", values="active")
-    growth_df = growth_df.reset_index()
-    growth_df.columns = growth_df.columns.astype(str)
-
-    # Calculate percent change between years
-    growth_df['pct_change_2019_2020'] = (growth_df['2020'] - growth_df['2019']) / growth_df['2019'] * 100
-    growth_df['pct_change_2020_2021'] = (growth_df['2021'] - growth_df['2020']) / growth_df['2020'] * 100
-    growth_df['pct_change_2021_2022'] = (growth_df['2022'] - growth_df['2021']) / growth_df['2021'] * 100
-
-    # Calculate the average percent change across these years
-    growth_df['mean_pct_change'] = growth_df[['pct_change_2019_2020', 'pct_change_2020_2021', 'pct_change_2021_2022']].mean(axis=1)
-    growth_df = growth_df[["county", "state", "mean_pct_change"]]
-
-    county_growth = growth_df[growth_df["county"] == county]["mean_pct_change"].iloc[0]
-    clean_growth = growth_df.dropna()
-    sort_growth = np.sort(clean_growth["mean_pct_change"])
-    growth_percentile = round(np.searchsorted(sort_growth, county_growth, side = "right")/ len(sort_growth)*100, 2)
-
-
-
-    sellability_list = [
+    sellability_card = [
         dbc.CardHeader("Sellability index"),
-        dbc.CardBody(f"{sell_percentile}%"),
+        dbc.CardBody(sell_list),
         dbc.CardFooter("County percentile median income", style={'fontSize': '12px'})
     ]
-    growth_list = [
+    growth_card = [
         dbc.CardHeader("Growth index"),
-        dbc.CardBody(f"{growth_percentile}%"),
+        dbc.CardBody(growth_list),
         dbc.CardFooter("county percentile for average yealy Microbusiness growth", style={'fontSize': '12px'})
     ]
-    hireability_list = [
+    hireability_card = [
         dbc.CardHeader("Hireability index"),
-        dbc.CardBody(f"{hire_percentile}%"),
+        dbc.CardBody(hire_list),
         dbc.CardFooter("County percentile for percent of population with bachelors degree", style={'fontSize': '12px'})
     ]
-    return sellability_list, growth_list, hireability_list
+    return sellability_card, growth_card, hireability_card
 
 if __name__ == '__main__':
     app.run_server(debug=False, port=8001, host='127.0.0.1')
