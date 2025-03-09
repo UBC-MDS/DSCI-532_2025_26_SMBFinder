@@ -1,13 +1,17 @@
-from dash import Dash, dcc, callback, Output, Input, html, dash_table
+from dash import Dash, Output, Input, html
 import dash_bootstrap_components as dbc
-import dash_vega_components as dvc
-import altair as alt
-import pandas as pd
-import numpy as np
 import json
 
 from .components.data_processing import generate_df
+from .components.layout import create_layout
+from .components.filters import limit_selections
 from .components.charts import update_density_chart_details, update_income_chart_details
+from .components.map_view import (
+        display_landing_page_map_choropleth_counties,
+        display_state_level_map,
+        display_county_level_map,
+        fix_cfips
+    )
 
 # Generate and unpack processed data
 data = generate_df()
@@ -18,16 +22,6 @@ total_microbusinesses = data["total_microbusinesses"]
 weighted_microbusiness_density = data["weighted_microbusiness_density"]
 median_income = data["median_income"]
 numeric_columns = data["numeric_columns"]
-
-from .components.filters import create_filters
-from .components.sidebar import create_sidebar
-
-from .components.map_view import (
-        display_landing_page_map_choropleth_counties,
-        display_state_level_map,
-        display_county_level_map,
-        fix_cfips
-    )
 
 # Load geojson files
 with open("data/raw/us-states.json") as f:
@@ -40,86 +34,8 @@ with open("data/raw/geojson-counties-fips.json") as f:
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-#initialize app variables
-title = [html.H1('SMBFinder - Explore Microbusinesses around the United States'), html.Br()]
-
-filter_state, filter_county, filter_column = create_filters(unique_states, numeric_columns)
-global_metrics = create_sidebar(total_microbusinesses, weighted_microbusiness_density, median_income)
-
-map = dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
-
-chart_SMB_density = [
-    dvc.Vega(id='density-placeholder', spec={'height': '230px'})  
-]          
-
-chart_med_income = [
-    dvc.Vega(id='income-placeholder', style={'height': '230px'})
-]
-
-card_sellability = dbc.Card(id = "sellability")
-
-card_growth = dbc.Card(id = "growth")
-
-card_hireability = dbc.Card(id = "hireability")
-
-end_credits = html.Div([
-    html.Br(),
-    html.H6("App allowing user to explore MicroBusiness density across the US, and derive key metrics used in deciding where to launch their next venture", style={'marginBottom': '5px', 'fontSize': '16px'}),
-    html.H6("Created by: Anna Nandar, Dongchun Chen, Jiayi Li, Marek Boulerice", style={'marginBottom': '5px', 'fontSize': '10px'}),
-    html.H6("Repo: https://github.com/UBC-MDS/DSCI-532_2025_26_SMBFinder", style={'marginBottom': '5px', 'fontSize': '10px'}),
-    html.H6("Latest Deployment: 2025/03/01", style={'marginBottom': '5px', 'fontSize': '10px'}),
-])
-
-#app layout
-app.layout = dbc.Container([
-        dbc.Row(dbc.Col(title)),
-        dbc.Row([
-                dbc.Col(
-                    dbc.Tabs(
-                        [
-                            dbc.Tab(
-                                [
-                                    global_metrics
-                                ],
-                                label = "USA"
-                            ),
-                            dbc.Tab(
-                                [
-                                    dbc.Row(card_sellability),
-                                    dbc.Row(card_growth),
-                                    dbc.Row(card_hireability),
-                                ],
-                                label = "County"
-                            )
-                        ]
-                    ), md = 3, style={'marginTop': '30px'}),
-                dbc.Col([
-                    dbc.Row([
-                            dbc.Col(filter_state),
-                            dbc.Col(filter_county),
-                            dbc.Col(filter_column),  # Add the new dropdown here
-                    ]),
-                    # Put map in its own Row for proper alignment
-                    dbc.Row(dbc.Col(map, className="p-0")),  # Added p-0 class to remove padding
-                ], md=9),
-        ]),
-
-        # Add this new row for the data table
-        dbc.Row([
-            dbc.Col([
-                html.H4("Filtered Data"),
-                html.Div(id='filtered-data-table')
-            ])
-        ]),
-
-        dbc.Row(
-            [
-                dbc.Col(chart_SMB_density),
-                dbc.Col(chart_med_income),
-            ]
-        ), 
-        dbc.Row(end_credits)
-])
+# Set up layout (imported from `layout.py`)
+app.layout = create_layout(unique_states, numeric_columns, total_microbusinesses, weighted_microbusiness_density, median_income)
 
 @app.callback(
     Output("state-dropdown", "options"),
@@ -127,29 +43,8 @@ app.layout = dbc.Container([
     Output("county-dropdown", "disabled"),
     Input("state-dropdown", "value")
 )
-def limit_selections(selected_states):
-    """Limit state selection to 3 and allow multiple counties only if one state is chosen."""
-
-    # Ensure state selection is limited to 3
-    updated_state_options = [
-        {"label": state, "value": state, "disabled": selected_states and len(selected_states) >= 3}
-        for state in unique_states
-    ]
-
-    available_counties = []
-    county_disabled = True  # Default: disabled
-
-    if selected_states and len(selected_states) == 1:
-        # Ensure the selected state exists in the mapping
-        available_counties = state_county_mapping.get(selected_states[0], [])
-        county_disabled = False  # Enable dropdown if exactly 1 state is selected
-
-    updated_county_options = [
-        {"label": county, "value": county, "disabled": False}
-        for county in available_counties
-    ]
-
-    return updated_state_options, updated_county_options, county_disabled
+def update_filter_options(selected_states):
+    return limit_selections(selected_states, unique_states, state_county_mapping)
 
 @app.callback(
     Output("map-placeholder", "figure"),
@@ -204,12 +99,10 @@ def update_map(selected_state, selected_county, selected_column):
     [Input("state-dropdown", "value"),
      Input("county-dropdown", "value")]
 )
-
 def update_density_chart(selected_state=None, selected_county=None):
 
     return update_density_chart_details(df, selected_state, selected_county)
     
-
 @app.callback(
     Output("income-placeholder", "spec"),
     [Input("state-dropdown", "value"),
