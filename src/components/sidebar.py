@@ -21,3 +21,13 @@ def create_sidebar(total_microbusinesses, weighted_microbusiness_density, median
             html.P(f"${median_income:,.0f}", style={'fontSize': '17px', 'fontWeight': 'bold', 'marginTop': '5px'})
         ], style={'textAlign': 'center', 'backgroundColor': '#D7EBF6', 'padding': '15px', 'borderRadius': '10px', 'marginBottom': '20px'}),
     ], style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '90%'})
+
+
+def create_county_sidebar(card_sellability, card_growth, card_hireability):
+    return html.Div([
+        html.H4("County Business Indices", style={'textAlign': 'center', 'fontSize': '20px', 'marginBottom': '25px'}),
+        card_sellability,
+        card_growth,
+        card_hireability,
+        html.H6("Business indices measure how the selected county performs in key metrics, compared to all counties in the US", style={'textAlign': 'center', 'marginBottom': '7px', 'fontSize': '12px'}),
+    ],style={'border': '2px solid black', 'padding': '15px', 'borderRadius': '10px', 'width': '90%'})
