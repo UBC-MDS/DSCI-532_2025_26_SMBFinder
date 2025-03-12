@@ -1,6 +1,9 @@
 import plotly.express as px
 import pandas as pd
 
+
+COLOR_SCALE = "thermal"
+
 def get_hover_data():
     return {
         'state': True,
@@ -83,7 +86,7 @@ def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom
         geojson=geojson_file, 
         locations=location_col, 
         color=color_col,
-        color_continuous_scale="Blackbody",
+        color_continuous_scale=COLOR_SCALE,
         map_style="carto-positron",
         zoom=zoom, 
         center={"lat": center_lat, "lon": center_lon},
@@ -167,5 +170,54 @@ def display_county_level_map(enriched_df, geojson_file, location_col, color_col)
             zoom=8, 
             opacity=0.5
         )
+
 def fix_cfips(cfips):
     return str(cfips).zfill(5)
+
+def update_map_display(latest_map_data, selected_state, selected_county, selected_column, counties_geojson):
+    """
+    Updates the map based on selected filters.
+    
+    Args:
+        latest_map_data: DataFrame with the latest data for mapping
+        selected_state: String or list of selected states
+        selected_county: String or list of selected counties
+        selected_column: Column to display in the choropleth
+        counties_geojson: GeoJSON data for counties
+    
+    Returns:
+        Plotly figure object
+    """
+    column_to_display = selected_column if selected_column else 'growth_index'
+    
+    if selected_state:
+        if isinstance(selected_state, list):
+            filtered_df = latest_map_data[latest_map_data["state"].isin(selected_state)]
+        else:
+            filtered_df = latest_map_data[latest_map_data["state"] == selected_state]
+    else:
+        filtered_df = latest_map_data
+        
+    if selected_county:
+        if isinstance(selected_county, list):
+            filtered_df = filtered_df[filtered_df["county"].isin(selected_county)]
+        else:
+            filtered_df = filtered_df[filtered_df["county"] == selected_county]
+    
+    if selected_county:
+        fig = display_county_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
+    elif selected_state:
+        fig = display_state_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
+    else:
+        fig = display_landing_page_map_choropleth_counties(filtered_df, counties_geojson, 0.7, 'cfips_fixed', column_to_display)
+    
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=True,
+        margin={"r":150, "t":20, "l":20, "b":20},
+        height=550,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    return fig
