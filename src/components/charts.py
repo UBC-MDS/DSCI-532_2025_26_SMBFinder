@@ -98,9 +98,14 @@ def update_income_chart_details(df, selected_states=None, selected_counties=None
     line_chart = alt.Chart(grouped_df).mark_line().encode(
         x=alt.X('year:O', title="Year", axis=alt.Axis(labelAngle=0)),
         y=alt.Y('median_income:Q', title="Median Household Income"),
-        color=alt.Color(f"{group_col}:N", title="Location"),
-        tooltip=['year:O', 'median_income:Q', f"{group_col}:N"]
+        color=alt.Color(f"{group_col}:N", title="Location", legend=alt.Legend(
+            orient='none',
+            legendX=130, legendY=-40,
+            direction='vertical',
+            titleAnchor='middle')),
+        tooltip=['year:O', 'median_income:Q', f"{group_col}:N"],
     )
+
 
     scatter_points = alt.Chart(grouped_df).mark_point(
         size=80,  
@@ -113,7 +118,7 @@ def update_income_chart_details(df, selected_states=None, selected_counties=None
     )
 
     final_chart = (line_chart + scatter_points).properties(
-        width=450, height=300,
+        height=300, width=380,
         title=chart_title  
     ).configure_title(
         fontSize=15

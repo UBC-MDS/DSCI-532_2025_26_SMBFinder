@@ -108,7 +108,17 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
 
     # Charts
     chart_SMB_density = [dvc.Vega(id='density-placeholder', spec={'height': '230px'})]  
-    chart_med_income = [dvc.Vega(id='income-placeholder', style={'height': '230px'})]
+    chart_med_income = dbc.Card(
+        dbc.CardBody([
+            dvc.Vega(id='income-placeholder', style={'width': '100%', 'height': '100%'})
+        ],style={"backgroundColor": "#F8F9FA",
+                 "padding": "10px",
+                 "overflow": "hidden",
+                 "md":"6",
+                 })
+    )
+    
+    
 
     # Final Layout
     return dbc.Container([
@@ -133,8 +143,8 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                         dbc.Row(dbc.Col(map_component, className="p-0")),  # Ensures proper spacing
                         html.Br(),
                         dbc.Row([
-                            dbc.Col(chart_SMB_density, width=5), 
-                            dbc.Col(chart_med_income, width=5),
+                            dbc.Col(chart_SMB_density, md=6), 
+                            dbc.Col(chart_med_income, md=6),
                         ],justify="between")
                     ],
                     md=9,
