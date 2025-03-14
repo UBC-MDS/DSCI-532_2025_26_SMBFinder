@@ -99,8 +99,8 @@ def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom
     return _configure_colorbar(fig, color_col)
 
 def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile, location_col, color_col):
-    percentile_filtered = enriched_df['microbusiness_density'].quantile(percentile)
-    high_density_counties = enriched_df[enriched_df['microbusiness_density'] > percentile_filtered]
+    percentile_filtered = enriched_df[color_col].quantile(percentile)
+    high_density_counties = enriched_df[enriched_df[color_col] > percentile_filtered]
     
     fig = _create_base_choropleth(
         high_density_counties, 
