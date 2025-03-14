@@ -33,7 +33,8 @@ with open("data/raw/geojson-counties-fips.json") as f:
     counties_geojson = json.load(f)
 
 #initialize app
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"])
+app.title="SMBFinder"
 server = app.server
 
 # Set up layout (imported from `layout.py`)
