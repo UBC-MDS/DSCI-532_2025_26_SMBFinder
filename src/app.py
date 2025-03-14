@@ -50,10 +50,10 @@ app.layout = create_layout(unique_states, numeric_columns, total_microbusinesses
 def update_filter_options(selected_states, selected_counties):
     return limit_selections(selected_states, unique_states, state_county_mapping, selected_counties)
 
-def generate_latest_map_data(df):
-    return df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
+# def generate_latest_map_data(df):
+#     return df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
 
-latest_map_data = generate_latest_map_data(df)
+# latest_map_data = generate_latest_map_data(df)
 
 @app.callback(
     Output("map-placeholder", "figure"),
@@ -62,7 +62,7 @@ latest_map_data = generate_latest_map_data(df)
      Input("column-dropdown", "value")]  
 )
 def update_map(selected_state, selected_county, selected_column):
-    return update_map_display(latest_map_data, selected_state, selected_county, selected_column, counties_geojson)
+    return update_map_display(df, selected_state, selected_county, selected_column, counties_geojson)
 
 @app.callback(
     Output("density-placeholder", "spec"),

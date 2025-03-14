@@ -11,12 +11,11 @@ def get_hover_data():
         'microbusiness_density': ':.2f',
         'active': True,
         'median_hh_inc_2021': True,
-        'pct_bb_2021': ':.1f',
-        'pct_college_2021': ':.1f',
-        'pct_foreign_born_2021': ':.1f',
-        'pct_it_workers_2021': ':.1f',
         'centroid_lat': False,
-        'centroid_lng': False
+        'centroid_lng': False,
+        'sellability_index': ':.2f',
+        'hireability_index': ':.2f',
+        'growth_index': ':.2f'
     }
 
 def get_labels():
@@ -27,10 +26,9 @@ def get_labels():
         'state': 'State',
         'active': 'Active Microbusinesses',
         'median_hh_inc_2021': 'Median Household Income (2021)',
-        'pct_bb_2021': 'Broadband Access %',
-        'pct_college_2021': 'College Education %',
-        'pct_foreign_born_2021': 'Foreign Born Population %',
-        'pct_it_workers_2021': 'IT Industry Workers %'
+        'sellability_index': 'Sellability Index',
+        'hireability_index': 'Hireability Index',
+        'growth_index': 'Growth Index'
     }
 
 def get_tooltip_descriptions():
@@ -38,10 +36,9 @@ def get_tooltip_descriptions():
         'microbusiness_density': 'Microbusinesses per 100 people over the age of 18',
         'active': 'Raw count of microbusinesses in the county',
         'median_hh_inc_2021': 'Median household income (inflation-adjusted to 2021 dollars)',
-        'pct_bb_2021': 'Percentage of households with access to broadband of any type',
-        'pct_college_2021': 'Percentage of population over age 25 with a 4-year college degree',
-        'pct_foreign_born_2021': 'Percentage of population born outside of the United States',
-        'pct_it_workers_2021': 'Percentage of workforce employed in information related industries'
+        'sellability_index': 'Index measuring potential for business sales',
+        'hireability_index': 'Index measuring potential for hiring employees',
+        'growth_index': 'Index measuring potential for business growth'
     }
 
 def get_legend_margin():
@@ -80,21 +77,38 @@ def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom
     """Create a base choropleth map with common settings."""
     center_lat = data_df['centroid_lat'].mean()
     center_lon = data_df['centroid_lng'].mean()
+
+    if color_col == 'microbusiness_density':
+        fig = px.choropleth_map(
+            data_df, 
+            geojson=geojson_file, 
+            locations=location_col, 
+            color=color_col,
+            color_continuous_scale=COLOR_SCALE,
+            map_style="carto-positron",
+            zoom=zoom, 
+            center={"lat": center_lat, "lon": center_lon},
+            opacity=opacity,
+            # range_color=(0, 100),
+            labels=get_labels(),
+            hover_data=get_hover_data()
+        )
     
-    fig = px.choropleth_map(
-        data_df, 
-        geojson=geojson_file, 
-        locations=location_col, 
-        color=color_col,
-        color_continuous_scale=COLOR_SCALE,
-        map_style="carto-positron",
-        zoom=zoom, 
-        center={"lat": center_lat, "lon": center_lon},
-        opacity=opacity,
-        range_color=(0, 100),
-        labels=get_labels(),
-        hover_data=get_hover_data()
-    )
+    else:
+        fig = px.choropleth_map(
+            data_df, 
+            geojson=geojson_file, 
+            locations=location_col, 
+            color=color_col,
+            color_continuous_scale=COLOR_SCALE,
+            map_style="carto-positron",
+            zoom=zoom, 
+            center={"lat": center_lat, "lon": center_lon},
+            opacity=opacity,
+            range_color=(0, 100),
+            labels=get_labels(),
+            hover_data=get_hover_data()
+        )
     
     return _configure_colorbar(fig, color_col)
 
