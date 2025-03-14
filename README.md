@@ -75,7 +75,7 @@ Read our **Contributing Guide** to get started!
 #### Step 1: Clone the repository
 
 ```sh
-git clone https://github.com/UBC-MDS/DSCI-532_2025_26_smbfinder.git
+git clone https://github.com/UBC-MDS/DSCI-532_2025_26_SMBFinder.git
 cd your-repo-folder
 ```
 
@@ -93,7 +93,7 @@ python src/app.py
 
 #### Step 4: Start contributing!
 
-- Report issues or suggest enhancements in GitHub Issues: [SMBFinder Issues](https://github.com/UBC-MDS/DSCI-532_2025_26_smbfinder/issues)
+- Report issues or suggest enhancements in GitHub Issues: [SMBFinder Issues](https://github.com/UBC-MDS/DSCI-532_2025_26_SMBFinder/issues)
 - Share feedback on documentation and dataset usage.
 
 ---
