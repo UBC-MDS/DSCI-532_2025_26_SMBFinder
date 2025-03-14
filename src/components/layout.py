@@ -132,7 +132,10 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                         dbc.Row([dbc.Col(filter_state), dbc.Col(filter_county), dbc.Col(filter_column)]),
                         dbc.Row(dbc.Col(map_component, className="p-0")),  # Ensures proper spacing
                         html.Br(),
-                        dbc.Row([dbc.Col(chart_SMB_density), dbc.Col(chart_med_income)])
+                        dbc.Row([
+                            dbc.Col(chart_SMB_density, width=5), 
+                            dbc.Col(chart_med_income, width=5),
+                        ],justify="between")
                     ],
                     md=9,
                 ),
