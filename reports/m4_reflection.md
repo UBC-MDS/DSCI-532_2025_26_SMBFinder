@@ -24,29 +24,33 @@
      ```
      
      - While in theory, this cache could speed up the workflow, from user behavior, we find that if the user selects states/counties to compare, they generally don't select the same combination again. Furthermore, this process degraded the performance because it meant the app would have to perform a cache operation every time a map is loaded.
-     - Additionally, this is actually an interesting permutation problem, where at any given time, a user could either select 3 states or 3 counties within a state. Since there are 50 states and ~3100 counties, even if we set our cache to the size of 1,000, our hit rate (user using the same cache again) would be around 0.05%, and 0.5% if the cache size is 10,000. Therefore, we would benefit if we were not to have a cache component in our app.
+     - Additionally, this is actually an interesting permutation problem, where at any given time, a user could either select 3 states or 3 counties within a state. Since there are 50 states and ~3100 counties, even if we set our cache to the size of 1,000, our hit rate (user using the same cache again) would be around 0.05%, and 0.5% if the cache size is 10,000. Therefore, we would benefit if we were not to have a cache component in our map function.
 
 
 ### Smaller Feedback Items
 1. **Change color scale to be more intuitive**:
-   - **Action Taken**: We added a light blue background in the title banner.
+   - **Action Taken**: Adjusted the color scale so that lighter shades indicate higher index values.
 
 2. **Button for About info instead of at the bottom**:
    - **Action Taken**: We added GitHub and About info beside the title.
 
-3. **Remove "filtered data" label**:
+3. **Cards in the same style/color and title also**:
+   - **Action Taken**: Unified the design of cards (sidebar) and title with a light blue background.
+
+4. **Remove "filtered data" label**:
    - **Action Taken**: We removed it.
 
-4. **Add units to all cards**:
-   - **Action Taken**: Units have been added to each card.
+5. **Add units to all cards**:
+   - **Action Taken**: Units have been added to "Avg. Microbusiness Density"
 
-5. **Align input filters**:
+6. **Align input filters**:
    - **Action Taken**: The filters were previously misaligned; they have now been adjusted.
 
-6. **Consider if zero should be in the y-axis for line charts**:
-   - **Action Taken**: Previously, the y-axis for both line charts started from zero. Now, they dynamically adjust based on the selected filter values.
+7. **Consider cards for lines chart**:
+   - **Action Taken**: Placed line charts inside cards for a more cohesive layout.
 
-7. **Added favicon.ico**.
+8. **Consider if zero should be in the y-axis for line charts**:
+   - **Action Taken**: Previously, the y-axis for both line charts started from zero. Now, they dynamically adjust based on the selected filter values.
 
 ---
 
