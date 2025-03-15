@@ -1,5 +1,6 @@
 from dash import Dash, Output, Input, html
 import dash_bootstrap_components as dbc
+from .utils.cache import cache
 import json
 
 from .components.data_processing import generate_df
@@ -35,6 +36,12 @@ with open("data/raw/geojson-counties-fips.json") as f:
 #initialize app
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"])
 app.title="SMBFinder"
+
+# Configure cache
+cache.init_app(
+    app.server,
+    config={'CACHE_TYPE': 'simple'})
+
 server = app.server
 
 # Set up layout (imported from `layout.py`)

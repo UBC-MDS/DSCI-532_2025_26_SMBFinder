@@ -1,7 +1,8 @@
 import altair as alt
 import pandas as pd
+from src.utils.cache import cache
 
-
+@cache.memoize()
 def update_density_chart_details(df, selected_states=None, selected_counties=None):
 
     df_smb = df.copy()
@@ -56,6 +57,7 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
     return final_chart.to_dict()
 
 
+@cache.memoize()
 def update_income_chart_details(df, selected_states=None, selected_counties=None):
 
     df_income = df.copy()
