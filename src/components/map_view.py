@@ -1,6 +1,9 @@
 import plotly.express as px
 import pandas as pd
 
+
+COLOR_SCALE = "thermal"
+
 def get_hover_data():
     return {
         'state': True,
@@ -8,12 +11,11 @@ def get_hover_data():
         'microbusiness_density': ':.2f',
         'active': True,
         'median_hh_inc_2021': True,
-        'pct_bb_2021': ':.1f',
-        'pct_college_2021': ':.1f',
-        'pct_foreign_born_2021': ':.1f',
-        'pct_it_workers_2021': ':.1f',
         'centroid_lat': False,
-        'centroid_lng': False
+        'centroid_lng': False,
+        'sellability_index': ':.2f',
+        'hireability_index': ':.2f',
+        'growth_index': ':.2f'
     }
 
 def get_labels():
@@ -24,10 +26,9 @@ def get_labels():
         'state': 'State',
         'active': 'Active Microbusinesses',
         'median_hh_inc_2021': 'Median Household Income (2021)',
-        'pct_bb_2021': 'Broadband Access %',
-        'pct_college_2021': 'College Education %',
-        'pct_foreign_born_2021': 'Foreign Born Population %',
-        'pct_it_workers_2021': 'IT Industry Workers %'
+        'sellability_index': 'Sellability Index',
+        'hireability_index': 'Hireability Index',
+        'growth_index': 'Growth Index'
     }
 
 def get_tooltip_descriptions():
@@ -35,10 +36,9 @@ def get_tooltip_descriptions():
         'microbusiness_density': 'Microbusinesses per 100 people over the age of 18',
         'active': 'Raw count of microbusinesses in the county',
         'median_hh_inc_2021': 'Median household income (inflation-adjusted to 2021 dollars)',
-        'pct_bb_2021': 'Percentage of households with access to broadband of any type',
-        'pct_college_2021': 'Percentage of population over age 25 with a 4-year college degree',
-        'pct_foreign_born_2021': 'Percentage of population born outside of the United States',
-        'pct_it_workers_2021': 'Percentage of workforce employed in information related industries'
+        'sellability_index': 'Index measuring potential for business sales',
+        'hireability_index': 'Index measuring potential for hiring employees',
+        'growth_index': 'Index measuring potential for business growth'
     }
 
 def get_legend_margin():
@@ -77,27 +77,44 @@ def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom
     """Create a base choropleth map with common settings."""
     center_lat = data_df['centroid_lat'].mean()
     center_lon = data_df['centroid_lng'].mean()
+
+    if color_col == 'microbusiness_density':
+        fig = px.choropleth_map(
+            data_df, 
+            geojson=geojson_file, 
+            locations=location_col, 
+            color=color_col,
+            color_continuous_scale=COLOR_SCALE,
+            map_style="carto-positron",
+            zoom=zoom, 
+            center={"lat": center_lat, "lon": center_lon},
+            opacity=opacity,
+            # range_color=(0, 100),
+            labels=get_labels(),
+            hover_data=get_hover_data()
+        )
     
-    fig = px.choropleth_map(
-        data_df, 
-        geojson=geojson_file, 
-        locations=location_col, 
-        color=color_col,
-        color_continuous_scale="Blackbody",
-        map_style="carto-positron",
-        zoom=zoom, 
-        center={"lat": center_lat, "lon": center_lon},
-        opacity=opacity,
-        range_color=(0, 100),
-        labels=get_labels(),
-        hover_data=get_hover_data()
-    )
+    else:
+        fig = px.choropleth_map(
+            data_df, 
+            geojson=geojson_file, 
+            locations=location_col, 
+            color=color_col,
+            color_continuous_scale=COLOR_SCALE,
+            map_style="carto-positron",
+            zoom=zoom, 
+            center={"lat": center_lat, "lon": center_lon},
+            opacity=opacity,
+            range_color=(0, 100),
+            labels=get_labels(),
+            hover_data=get_hover_data()
+        )
     
     return _configure_colorbar(fig, color_col)
 
 def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile, location_col, color_col):
-    percentile_filtered = enriched_df['microbusiness_density'].quantile(percentile)
-    high_density_counties = enriched_df[enriched_df['microbusiness_density'] > percentile_filtered]
+    percentile_filtered = enriched_df[color_col].quantile(percentile)
+    high_density_counties = enriched_df[enriched_df[color_col] > percentile_filtered]
     
     fig = _create_base_choropleth(
         high_density_counties, 
@@ -167,5 +184,54 @@ def display_county_level_map(enriched_df, geojson_file, location_col, color_col)
             zoom=8, 
             opacity=0.5
         )
+
 def fix_cfips(cfips):
     return str(cfips).zfill(5)
+
+def update_map_display(latest_map_data, selected_state, selected_county, selected_column, counties_geojson):
+    """
+    Updates the map based on selected filters.
+    
+    Args:
+        latest_map_data: DataFrame with the latest data for mapping
+        selected_state: String or list of selected states
+        selected_county: String or list of selected counties
+        selected_column: Column to display in the choropleth
+        counties_geojson: GeoJSON data for counties
+    
+    Returns:
+        Plotly figure object
+    """
+    column_to_display = selected_column if selected_column else 'growth_index'
+    
+    if selected_state:
+        if isinstance(selected_state, list):
+            filtered_df = latest_map_data[latest_map_data["state"].isin(selected_state)]
+        else:
+            filtered_df = latest_map_data[latest_map_data["state"] == selected_state]
+    else:
+        filtered_df = latest_map_data
+        
+    if selected_county:
+        if isinstance(selected_county, list):
+            filtered_df = filtered_df[filtered_df["county"].isin(selected_county)]
+        else:
+            filtered_df = filtered_df[filtered_df["county"] == selected_county]
+    
+    if selected_county:
+        fig = display_county_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
+    elif selected_state:
+        fig = display_state_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
+    else:
+        fig = display_landing_page_map_choropleth_counties(filtered_df, counties_geojson, 0.7, 'cfips_fixed', column_to_display)
+    
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=True,
+        margin={"r":150, "t":20, "l":20, "b":20},
+        height=550,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    return fig

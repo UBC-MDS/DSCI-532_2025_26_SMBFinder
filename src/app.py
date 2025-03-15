@@ -10,7 +10,8 @@ from .components.map_view import (
         display_landing_page_map_choropleth_counties,
         display_state_level_map,
         display_county_level_map,
-        fix_cfips
+        fix_cfips,
+        update_map_display
     )
 from .components.BI_cards import update_cards
 
@@ -49,6 +50,11 @@ app.layout = create_layout(unique_states, numeric_columns, total_microbusinesses
 def update_filter_options(selected_states, selected_counties):
     return limit_selections(selected_states, unique_states, state_county_mapping, selected_counties)
 
+# def generate_latest_map_data(df):
+#     return df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
+
+# latest_map_data = generate_latest_map_data(df)
+
 @app.callback(
     Output("map-placeholder", "figure"),
     [Input("state-dropdown", "value"),
@@ -56,46 +62,7 @@ def update_filter_options(selected_states, selected_counties):
      Input("column-dropdown", "value")]  
 )
 def update_map(selected_state, selected_county, selected_column):
-    global df
-    
-    temp_df = df.copy()
-    temp_df = temp_df.sort_values('first_day_of_month').groupby('cfips').last().reset_index()
-    
-    if selected_state:
-        if isinstance(selected_state, list):
-            filtered_df = temp_df[temp_df["state"].isin(selected_state)]
-        else:
-            filtered_df = temp_df[temp_df["state"] == selected_state]
-    else:
-        filtered_df = temp_df
-        
-    if selected_county:
-        if isinstance(selected_county, list):
-            filtered_df = filtered_df[filtered_df["county"].isin(selected_county)]
-        else:
-            filtered_df = filtered_df[filtered_df["county"] == selected_county]
-    
-    filtered_df['cfips_fixed'] = filtered_df['cfips_fixed'].apply(fix_cfips)
-
-    column_to_display = selected_column if selected_column else 'growth_index'
-    
-    if selected_county:
-        fig = display_county_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
-    elif selected_state:
-        fig = display_state_level_map(filtered_df, counties_geojson, 'cfips_fixed', column_to_display)
-    else:
-        fig = display_landing_page_map_choropleth_counties(filtered_df, counties_geojson, 0.7, 'cfips_fixed', column_to_display)
-    
-    fig.update_layout(
-        showlegend=False,
-        coloraxis_showscale=True,
-        margin={"r":150, "t":20, "l":20, "b":20},
-        height=550,
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
-    )
-    
-    return fig
+    return update_map_display(df, selected_state, selected_county, selected_column, counties_geojson)
 
 @app.callback(
     Output("density-placeholder", "spec"),
