@@ -88,7 +88,7 @@ pip install -r requirements.txt
 #### Step 3: Run the app locally in the repository's root directory
 
 ```sh
-python src/app.py
+python -m src.app
 ```
 
 #### Step 4: Start contributing!
@@ -106,7 +106,7 @@ This project utilizes data from GoDaddy - Microbusiness Density Forecasting (Kag
 
 ## License
 
-`SMBFinder` was created by Anna Nandar, Dongchun Chen, jiayi Li and Marek Boulerice. It is licensed under the terms of the MIT license.
+`SMBFinder` was created by Anna Nandar, Dongchun Chen, Jiayi Li and Marek Boulerice. It is licensed under the terms of the MIT license.
 
 ## Thank You
 
