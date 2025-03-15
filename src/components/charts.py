@@ -54,7 +54,12 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
 
     final_chart = (line_chart + scatter_points).properties(
         height=280, width=380, title=chart_title
-    ).configure_title(fontSize=15).interactive()
+    ).configure_title(
+        fontSize=15
+    ).configure_axis(
+        labelFontSize=14, 
+        titleFontSize=16  
+    ).interactive()
 
     return final_chart.to_dict()
 
@@ -117,6 +122,11 @@ def update_income_chart_details(df, selected_states=None, selected_counties=None
 
     final_chart = (line_chart + scatter_points).properties(
         height=280, width=380, title=chart_title  
-    ).configure_title(fontSize=15).interactive()
+    ).configure_title(
+        fontSize=15
+    ).configure_axis(
+        labelFontSize=14,  
+        titleFontSize=16   
+    ).interactive()
 
     return final_chart.to_dict()
