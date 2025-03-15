@@ -30,13 +30,13 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
         
         grouped_df = filtered_df.groupby(["year", group_col], as_index=False)["microbusiness_density"].mean().round(2)
 
-    y_min = grouped_df["microbusiness_density"].min() * 0.9  # 10% below the min value
-    y_max = grouped_df["microbusiness_density"].max() * 1.1  # 10% above the max value
+    y_min = grouped_df["microbusiness_density"].min() * 0.9  
+    y_max = grouped_df["microbusiness_density"].max() * 1.1  
 
     line_chart = alt.Chart(grouped_df).mark_line().encode(
         x=alt.X('year:O', title="Year", axis=alt.Axis(labelAngle=0)),
         y=alt.Y('microbusiness_density:Q', title="Microbusiness Density",
-                scale=alt.Scale(domain=[y_min, y_max])),  # Apply dynamic scaling
+                scale=alt.Scale(domain=[y_min, y_max])),  
         color=alt.Color(f"{group_col}:N", title="Location", legend=alt.Legend(
             orient='top', 
             direction='horizontal',
