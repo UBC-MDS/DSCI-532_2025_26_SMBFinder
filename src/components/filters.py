@@ -11,7 +11,7 @@ def create_filters(unique_states, numeric_columns):
             options=[{"label": state, "value": state} for state in unique_states], 
             placeholder='Select up to 3 States',
             multi=True,
-            style={'width': '200px', 'fontSize': '15px'}
+            style={'width': '260px', 'fontSize': '15px'}
         ),
     ])
 
@@ -32,7 +32,7 @@ def create_filters(unique_states, numeric_columns):
             id='column-dropdown',
             options=[{"label": col.replace('_', ' ').title(), "value": col} for col in numeric_columns],
             value='growth_index',
-            style={'width': '215px', 'fontSize': '15px'}
+            style={'width': '260px', 'fontSize': '15px'}
         ),
     ])
 

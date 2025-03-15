@@ -84,6 +84,18 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
     # Filters
     filter_state, filter_county, filter_column = create_filters(unique_states, numeric_columns)
 
+    #create card for all sliders:
+    card_sliders = dbc.Card(
+        dbc.CardBody([
+            dbc.Row([
+                filter_state,
+                filter_county,
+                filter_column,
+            ],justify="start")
+        ],style={"backgroundColor": "#F8F9FA",
+                 "padding": "10px",})
+    )
+
     # Sidebar Content (USA & County Metrics as Tabs)
     global_metrics = create_sidebar(total_microbusinesses, weighted_microbusiness_density, median_income)
 
@@ -112,8 +124,6 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                  "overflow": "hidden",
                  })
     )
-
-    # dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
 
     # Charts
     chart_SMB_density = dbc.Card(
@@ -155,7 +165,13 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                 # Main Content
                 dbc.Col(
                     [
-                        dbc.Row([dbc.Col(filter_state), dbc.Col(filter_county), dbc.Col(filter_column)]),
+                        dbc.Row([
+                            card_sliders,
+                            # dbc.Col(filter_state), 
+                            # dbc.Col(filter_county), 
+                            # dbc.Col(filter_column)
+                        ]),
+                        html.Br(),
                         dbc.Row(dbc.Col(map_component), justify="center"),  # Ensures proper spacing
                         html.Br(),
                         dbc.Row([
