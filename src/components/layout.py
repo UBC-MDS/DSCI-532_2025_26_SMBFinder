@@ -107,14 +107,22 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
     map_component = dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
 
     # Charts
-    chart_SMB_density = [dvc.Vega(id='density-placeholder', spec={'height': '230px'})]  
+    chart_SMB_density = dbc.Card(
+        dbc.CardBody([
+            dvc.Vega(id='density-placeholder', style={'width': '100%', 'height': '100%'})
+        ],style={"backgroundColor": "#F8F9FA",
+                 "padding": "10px",
+                 "overflow": "hidden",
+                 })
+    )
+    
+    
     chart_med_income = dbc.Card(
         dbc.CardBody([
             dvc.Vega(id='income-placeholder', style={'width': '100%', 'height': '100%'})
         ],style={"backgroundColor": "#F8F9FA",
                  "padding": "10px",
                  "overflow": "hidden",
-                 "md":"6",
                  })
     )
     

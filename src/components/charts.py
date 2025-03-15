@@ -37,7 +37,11 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
     line_chart = alt.Chart(grouped_df).mark_line().encode(
         x=alt.X('year:O', title="Year", axis=alt.Axis(labelAngle=0)),
         y=alt.Y('microbusiness_density:Q', title="Microbusiness Density"),
-        color=alt.Color(f"{group_col}:N", title="Location"),
+        color=alt.Color(f"{group_col}:N", title="Location",legend=alt.Legend(
+            orient='none',
+            legendX=130, legendY=-40,
+            direction='vertical',
+            titleAnchor='middle')),
         tooltip=['year:O', 'microbusiness_density:Q', f"{group_col}:N"]
     )
 
@@ -49,7 +53,7 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
     )
 
     final_chart = (line_chart + scatter_points).properties(
-        width=450, height=300, 
+        height=300, width=380, 
         title=chart_title
     ).configure_title(fontSize=15).interactive()
 
