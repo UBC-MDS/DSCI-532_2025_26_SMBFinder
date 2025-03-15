@@ -34,8 +34,8 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
         x=alt.X('year:O', title="Year", axis=alt.Axis(labelAngle=0)),
         y=alt.Y('microbusiness_density:Q', title="Microbusiness Density"),
         color=alt.Color(f"{group_col}:N", title="Location", legend=alt.Legend(
-            orient='right',  # Legend inside the chart on the right
-            direction='vertical',
+            orient='top',  # Moves legend above the chart
+            direction='horizontal',
             titleAnchor='middle'
         )),
         tooltip=['year:O', 'microbusiness_density:Q', f"{group_col}:N"]
@@ -49,15 +49,17 @@ def update_density_chart_details(df, selected_states=None, selected_counties=Non
     )
 
     final_chart = (line_chart + scatter_points).properties(
-        height=300, width=380, title=chart_title
+        height=280, width=380, title=chart_title
     ).configure_title(fontSize=15).interactive()
+
+    return final_chart.to_dict()
 
     return final_chart.to_dict()
 
 
 @cache.memoize()
 def update_income_chart_details(df, selected_states=None, selected_counties=None):
-    
+
     df_income = df.copy()
     income_columns = [col for col in df_income.columns if col.startswith("median_hh_inc_")]
     
@@ -93,8 +95,8 @@ def update_income_chart_details(df, selected_states=None, selected_counties=None
         x=alt.X('year:O', title="Year", axis=alt.Axis(labelAngle=0)),
         y=alt.Y('median_income:Q', title="Median Household Income"),
         color=alt.Color(f"{group_col}:N", title="Location", legend=alt.Legend(
-            orient='right',  # Legend inside the chart on the right
-            direction='vertical',
+            orient='top',  # Moves legend above the chart
+            direction='horizontal',
             titleAnchor='middle'
         )),
         tooltip=['year:O', 'median_income:Q', f"{group_col}:N"],
@@ -108,7 +110,7 @@ def update_income_chart_details(df, selected_states=None, selected_counties=None
     )
 
     final_chart = (line_chart + scatter_points).properties(
-        height=300, width=380, title=chart_title  
+        height=280, width=380, title=chart_title  
     ).configure_title(fontSize=15).interactive()
 
     return final_chart.to_dict()
