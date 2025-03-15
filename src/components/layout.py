@@ -91,9 +91,8 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                 filter_state,
                 filter_county,
                 filter_column,
-            ],justify="start")
-        ],style={"backgroundColor": "#F8F9FA",
-                 "padding": "10px",})
+            ],justify="between")
+        ],style={"backgroundColor": "#F8F9FA"})
     )
 
     # Sidebar Content (USA & County Metrics as Tabs)
@@ -167,10 +166,7 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                     [
                         dbc.Row([
                             card_sliders,
-                            # dbc.Col(filter_state), 
-                            # dbc.Col(filter_county), 
-                            # dbc.Col(filter_column)
-                        ]),
+                        ],style={"padding":"10px"}),
                         html.Br(),
                         dbc.Row(dbc.Col(map_component), justify="center"),  # Ensures proper spacing
                         html.Br(),
