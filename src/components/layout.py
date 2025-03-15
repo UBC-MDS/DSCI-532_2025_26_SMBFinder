@@ -104,7 +104,16 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
     )
 
     # Map Component
-    map_component = dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
+    map_component = dbc.Card(
+        dbc.CardBody([
+            dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
+        ],style={"backgroundColor": "#F8F9FA",
+                 "padding": "10px",
+                 "overflow": "hidden",
+                 })
+    )
+
+    # dcc.Graph(id='map-placeholder', style={'height': '550px', 'width': '100%'})
 
     # Charts
     chart_SMB_density = dbc.Card(
@@ -115,7 +124,6 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                  "overflow": "hidden",
                  })
     )
-    
     
     chart_med_income = dbc.Card(
         dbc.CardBody([
@@ -148,7 +156,7 @@ def create_layout(unique_states, numeric_columns, total_microbusinesses, weighte
                 dbc.Col(
                     [
                         dbc.Row([dbc.Col(filter_state), dbc.Col(filter_county), dbc.Col(filter_column)]),
-                        dbc.Row(dbc.Col(map_component, className="p-0")),  # Ensures proper spacing
+                        dbc.Row(dbc.Col(map_component), justify="center"),  # Ensures proper spacing
                         html.Br(),
                         dbc.Row([
                             dbc.Col(chart_SMB_density, md=6), 
