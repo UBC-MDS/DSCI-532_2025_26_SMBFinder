@@ -1,5 +1,6 @@
 import plotly.express as px
 import pandas as pd
+import time  # Add this at the top with other imports
 
 
 COLOR_SCALE = "thermal"
@@ -75,6 +76,8 @@ def _configure_colorbar(fig, color_col):
 
 def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom, opacity):
     """Create a base choropleth map with common settings."""
+    start_time = time.time()
+    
     center_lat = data_df['centroid_lat'].mean()
     center_lon = data_df['centroid_lng'].mean()
 
@@ -110,7 +113,24 @@ def _create_base_choropleth(data_df, geojson_file, location_col, color_col, zoom
             hover_data=get_hover_data()
         )
     
-    return _configure_colorbar(fig, color_col)
+    fig = _configure_colorbar(fig, color_col)
+    
+    end_time = time.time()
+    execution_time = end_time - start_time
+    
+    # Add timing information to the figure's layout title
+    fig.update_layout(
+        title=dict(
+            text=f"Map Generation Time: {execution_time:.2f}s",
+            x=0.01,  # Position at the left
+            y=0.99,  # Position at the top
+            xanchor='left',
+            yanchor='top',
+            font=dict(size=12)
+        )
+    )
+    
+    return fig
 
 def display_landing_page_map_choropleth_counties(enriched_df, geojson_file, percentile, location_col, color_col):
     percentile_filtered = enriched_df[color_col].quantile(percentile)
