@@ -19,12 +19,13 @@
       @cache.cached(timeout=300)
       def some_map_function():
          print("Cache miss - computing now")
-         # Your logic here
+         # Logic here
          return result
      ```
      
      - While in theory, this cache could speed up the workflow, from user behavior, we find that if the user selects states/counties to compare, they generally don't select the same combination again. Furthermore, this process degraded the performance because it meant the app would have to perform a cache operation every time a map is loaded.
      - Additionally, this is actually an interesting permutation problem, where at any given time, a user could either select 3 states or 3 counties within a state. Since there are 50 states and ~3100 counties, even if we set our cache to the size of 1,000, our hit rate (user using the same cache again) would be around 0.05%, and 0.5% if the cache size is 10,000. Therefore, we would benefit if we were not to have a cache component in our map function.
+     - Furthermore, we added a small timer to the map generation to help us debug the performance issue. We found that in general, the map generation takes anywhere between 2-10 times slower on Render vs locally. This is likely due to the Render instance being a 0.1 core CPU instance with 512MB of RAM, where most laptops have 4 cores and 8GB of RAM. This aligns with the fact that Plotly is a single-threaded library, by restricting cores down to 0.1, we experience 10x slowdown.
 
 
 ### Smaller Feedback Items
